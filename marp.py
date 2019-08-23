@@ -7,28 +7,57 @@ import pymap3d as pm
 RE = 6371.
 hR = 0.
 
-def ma2marp(lam, phi, lam0, phi0):
+class Marp(Apex):
+    def __init__(self, date=None, refh=0, datafile=None, lam0=0., phi0=0.):
 
-    lam = lam*np.pi/180.
-    phi = phi*np.pi/180.
-    lam0 = lam0*np.pi/180.
-    phi0 = phi0*np.pi/180.
+        self.lam0 = lam0
+        self.phi0 = phi0
 
-    # xr = np.cos(lam0)*np.cos(lam)*np.cos(phi0-phi) + np.sin(lam0)*np.sin(lam)
-    # yr = -np.cos(lam)*np.sin(phi0-phi)
-    # zr = -np.sin(lam0)*np.cos(lam)*np.cos(phi0-phi) + np.cos(lam0)*np.sin(lam)
+        super(Marp, self).__init__(date=date, refh=refh, datafile=None)
 
-    xr = np.cos(phi0)*np.cos(lam0)*np.cos(lam)*np.cos(phi) + np.cos(phi0)*np.sin(lam0)*np.sin(lam) + np.sin(phi0)*np.cos(lam)*np.sin(phi)
-    yr = -np.sin(phi0)*np.cos(lam0)*np.cos(lam)*np.cos(phi) - np.sin(phi0)*np.sin(lam0)*np.sin(lam) + np.cos(phi0)*np.cos(lam)*np.sin(phi)
-    zr = -np.sin(lam0)*np.cos(lam)*np.cos(phi) + np.cos(lam0)*np.sin(lam)
+    def apex2marp(self, lam, phi):
 
-    phir = np.arctan2(yr, xr)
-    lamr = np.arcsin(zr)
+        lam = lam*np.pi/180.
+        phi = phi*np.pi/180.
+        lam0 = self.lam0*np.pi/180.
+        phi0 = self.phi0*np.pi/180.
 
-    # lamr = np.arcsin(np.cos(lam0)*np.sin(lam) - np.cos(phi)*np.sin(lam0)*np.cos(lam))
-    # phir = np.arctan2(np.sin(phi), np.tan(lam)*np.sin(lam0) + np.cos(phi)*np.cos(lam0)) - phi0
+        xr = np.cos(phi0)*np.cos(lam0)*np.cos(lam)*np.cos(phi) + np.cos(phi0)*np.sin(lam0)*np.sin(lam) + np.sin(phi0)*np.cos(lam)*np.sin(phi)
+        yr = -np.sin(phi0)*np.cos(lam0)*np.cos(lam)*np.cos(phi) - np.sin(phi0)*np.sin(lam0)*np.sin(lam) + np.cos(phi0)*np.cos(lam)*np.sin(phi)
+        zr = -np.sin(lam0)*np.cos(lam)*np.cos(phi) + np.cos(lam0)*np.sin(lam)
 
-    return lamr*180./np.pi, phir*180./np.pi
+        phir = np.arctan2(yr, xr)
+        lamr = np.arcsin(zr)
+
+        return lamr*180./np.pi, phir*180./np.pi
+
+    def marp2apex(self, lamr, phir):
+
+        lamr = lamr*np.pi/180.
+        phir = phir*np.pi/180.
+        lam0 = self.lam0*np.pi/180.
+        phi0 = self.phi0*np.pi/180.
+
+        x = np.cos(lam0)*np.cos(phi0)*np.cos(lamr)*np.cos(phir) - np.cos(lam0)*np.sin(phi0)*np.cos(lamr)*np.sin(phir) - np.sin(lam0)*np.sin(lamr)
+        y = np.sin(phi0)*np.cos(lamr)*np.cos(phir) + np.cos(phi0)*np.cos(lamr)*np.sin(phir)
+        z = np.sin(lam0)*np.cos(phi0)*np.cos(lamr)*np.cos(phir) - np.sin(lam0)*np.sin(phi0)*np.cos(lamr)*np.sin(phir) + np.cos(lam0)*np.sin(lamr)
+
+        phi = np.arctan2(y, x)
+        lam = np.arcsin(z)
+
+        return lam*180./np.pi, phi*180./np.pi
+
+    def geo2marp(self, glat, glon, height):
+        alat, alon = self.geo2apex(glat, glon, height)
+        mlat, mlon = self.apex2marp(alat, alon)
+        return mlat, mlon
+
+    def marp2geo(self, mlat, mlon, height):
+        alat, alon = self.marp2apex(mlat, mlon)
+        glat, glon, err = self.apex2geo(alat, alon, height)
+        return glat, glon, err
+
+
 
 def base_vectors(lam, phi, lam0, phi0):
     Apx = Apex(2019)
