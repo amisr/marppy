@@ -57,43 +57,84 @@ class Marp(Apex):
         glat, glon, err = self.apex2geo(alat, alon, height)
         return glat, glon, err
 
+    def basevectors_marp(self, lat, lon, height, coords='geo'):
 
+        if coords == 'geo':
+            glat = lat
+            glon = lon
+            alat, alon = self.geo2apex(glat, glon, height)
+            mlat, mlon = self.apex2marp(alat, alon)
 
-def base_vectors(lam, phi, lam0, phi0):
-    Apx = Apex(2019)
-    f1, f2, f3, g1, g2, g3, d1, d2, d3, e1, e2, e3 = Apx.basevectors_apex(lam, phi, 0., coords='apex')
-    glat, glon, _ = Apx.apex2geo(lam, phi, 0.)
-    u, v, w = pm.enu2uvw(d1[0], d1[1], d1[2], glat, glon)
-    d1 = np.array([u, v, w])
-    u, v, w = pm.enu2uvw(d2[0], d2[1], d2[2], glat, glon)
-    d2 = np.array([u, v, w])
+        if coords == 'apex':
+            alat = lat
+            alon = lon
+            glat, glon, _ = self.apex2geo(alat, alon, height)
+            mlat, mlon = self.apex2marp(alat, alon)
 
-    lamr, phir = ma2marp(lam, phi, lam0, phi0)
+        lamr = mlat*np.pi/180.
+        phir = mlon*np.pi/180.
+        lam = alat*np.pi/180.
+        phi = alon*np.pi/180.
+        lam0 = self.lam0*np.pi/180.
+        phi0 = self.phi0*np.pi/180.
 
-    lam = lam*np.pi/180.
-    phi = phi*np.pi/180.
-    lam0 = lam0*np.pi/180.
-    phi0 = phi0*np.pi/180.
-    lamr = lamr*np.pi/180.
-    phir = phir*np.pi/180.
+        f1, f2, f3, g1, g2, g3, d1, d2, d3, e1, e2, e3 = self.basevectors_apex(glat, glon, height)
 
-    # xr = np.cos(phi0)*np.cos(lam0)*np.cos(lam)*np.cos(phi) + np.cos(phi0)*np.sin(lam0)*np.sin(lam) + np.sin(phi0)*np.cos(lam)*np.sin(phi)
-    # yr = -np.sin(phi0)*np.cos(lam0)*np.cos(lam)*np.cos(phi) - np.sin(phi0)*np.sin(lam0)*np.sin(lam) + np.cos(phi0)*np.cos(lam)*np.sin(phi)
-    # zr = -np.sin(lam0)*np.cos(lam)*np.cos(phi) + np.cos(lam0)*np.sin(lam)
+        dprdp = (np.sin(phir+phi0)*np.cos(lam0)*np.cos(lam)*np.sin(phi) + np.cos(phir+phi0)*np.cos(lam)*np.cos(phi))/np.cos(lamr)
+        dprdl = (np.sin(phir+phi0)*np.cos(lam0)*np.sin(lam)*np.cos(phi) - np.sin(phir+phi0)*np.sin(lam0)*np.cos(lam) - np.cos(phir+phi0)*np.sin(lam)*np.sin(phi))/np.cos(lamr)
+        dlrdp = (np.sin(lam0)*np.cos(lam)*np.sin(phi))/np.cos(lamr)
+        dlrdl = (np.sin(lam0)*np.sin(lam)*np.cos(phi) + np.cos(lam0)*np.cos(lam))/np.cos(lamr)
 
-    # phir = np.arctan2(yr, xr)
-    # lamr = np.arcsin(zr)
+        d1r = dprdp*d1 + dprdl*d2
+        d2r = dlrdp*d1 + dlrdl*d2
+        d3r = d3
 
-    d1r = 1/np.cos(lamr)*((np.sin(phir+phi0)*np.cos(lam0)*np.cos(lam)*np.sin(phi)+np.cos(phir+phi0)*np.cos(lam)*np.cos(phi))*d1 + (np.sin(phir+phi0)*np.cos(lam0)*np.sin(lam)*np.cos(phi)-np.sin(phir+phi0)*np.sin(lam0)*np.cos(lam)-np.cos(phir+phi0)*np.sin(lam)*np.sin(phi))*d2)
-    d2r = 1/np.cos(lamr)*(np.sin(lam0)*np.cos(lam)*np.sin(phi)*d1 + (np.sin(lam0)*np.sin(lam)*np.cos(phi)+np.cos(lam0)*np.cos(lam))*d2)
+        dpdpr = (np.cos(phi)*np.cos(lamr)*np.cos(phi0+phir) + np.cos(lam0)*np.sin(phi)*np.cos(lamr)*np.sin(phi0+phir))/np.cos(lam)
+        dpdlr = (-np.cos(phi)*np.sin(lamr)*np.sin(phi0+phir) + np.cos(lam0)*np.sin(phi)*np.sin(lamr)*np.cos(phi0+phir) + np.sin(lam0)*np.sin(phi)*np.cos(lamr))/np.cos(lam)
+        dldpr = (-np.sin(lam0)*np.cos(lamr)*np.sin(phi0+phir))/np.cos(lam)
+        dldlr = (-np.sin(lam0)*np.sin(lamr)*np.cos(phi0+phir) + np.cos(lam0)*np.cos(lamr))/np.cos(lam)
 
-    d1xd2 = np.cross(d1r.T, d2r.T).T
-    D = np.linalg.norm(d1xd2, axis=0)
-    d3r = d1xd2/D**2
+        e1r = dpdpr*e1 + dldpr*e2
+        e2r = dpdlr*e1 + dldlr*e2
+        e3r = e3
 
-    # Currently, this returns ECEF components
+        return d1r, d2r, d3r, e1r, e2r, e3r
 
-    return d1r, d2r, d3r
+# def base_vectors(lam, phi, lam0, phi0):
+#     Apx = Apex(2019)
+#     f1, f2, f3, g1, g2, g3, d1, d2, d3, e1, e2, e3 = Apx.basevectors_apex(lam, phi, 0., coords='apex')
+#     glat, glon, _ = Apx.apex2geo(lam, phi, 0.)
+#     u, v, w = pm.enu2uvw(d1[0], d1[1], d1[2], glat, glon)
+#     d1 = np.array([u, v, w])
+#     u, v, w = pm.enu2uvw(d2[0], d2[1], d2[2], glat, glon)
+#     d2 = np.array([u, v, w])
+
+#     lamr, phir = ma2marp(lam, phi, lam0, phi0)
+
+#     lam = lam*np.pi/180.
+#     phi = phi*np.pi/180.
+#     lam0 = lam0*np.pi/180.
+#     phi0 = phi0*np.pi/180.
+#     lamr = lamr*np.pi/180.
+#     phir = phir*np.pi/180.
+
+#     # xr = np.cos(phi0)*np.cos(lam0)*np.cos(lam)*np.cos(phi) + np.cos(phi0)*np.sin(lam0)*np.sin(lam) + np.sin(phi0)*np.cos(lam)*np.sin(phi)
+#     # yr = -np.sin(phi0)*np.cos(lam0)*np.cos(lam)*np.cos(phi) - np.sin(phi0)*np.sin(lam0)*np.sin(lam) + np.cos(phi0)*np.cos(lam)*np.sin(phi)
+#     # zr = -np.sin(lam0)*np.cos(lam)*np.cos(phi) + np.cos(lam0)*np.sin(lam)
+
+#     # phir = np.arctan2(yr, xr)
+#     # lamr = np.arcsin(zr)
+
+#     d1r = 1/np.cos(lamr)*((np.sin(phir+phi0)*np.cos(lam0)*np.cos(lam)*np.sin(phi)+np.cos(phir+phi0)*np.cos(lam)*np.cos(phi))*d1 + (np.sin(phir+phi0)*np.cos(lam0)*np.sin(lam)*np.cos(phi)-np.sin(phir+phi0)*np.sin(lam0)*np.cos(lam)-np.cos(phir+phi0)*np.sin(lam)*np.sin(phi))*d2)
+#     d2r = 1/np.cos(lamr)*(np.sin(lam0)*np.cos(lam)*np.sin(phi)*d1 + (np.sin(lam0)*np.sin(lam)*np.cos(phi)+np.cos(lam0)*np.cos(lam))*d2)
+
+#     d1xd2 = np.cross(d1r.T, d2r.T).T
+#     D = np.linalg.norm(d1xd2, axis=0)
+#     d3r = d1xd2/D**2
+
+#     # Currently, this returns ECEF components
+
+#     return d1r, d2r, d3r
 
 # def base_vectors2(lam, phi, lam0, phi0):
 #     Apx = Apex(2019)
