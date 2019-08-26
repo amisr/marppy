@@ -33,9 +33,10 @@ def test_basevectors():
     d1, d2, d3, e1, e2, e3 = rp.basevectors_marp(lat, lon, alt, coords='geo')
 
     d1xd2 = np.cross(d1.T, d2.T).T
+    d1xd2d3 = np.einsum('i...,i...->...', d1xd2, d3)
 
     # print('d3-d1xd2', d3-d1xd2/np.linalg.norm(d1xd2, axis=0)**2)
-    print('e3-d1xd2', e3-d1xd2)
+    print('e3-d1xd2', np.mean(e3-d1xd2/d1xd2d3, axis=1))
 
     print('d1.e1', np.mean(np.einsum('i...,i...->...', d1, e1)))
     print('d1.e2', np.mean(np.einsum('i...,i...->...', d1, e2)))
@@ -53,31 +54,45 @@ def test_mapping():
 
     alat = 70.
     alon = 60.
+    altA = 100.
+    altB = 4000.
+
     EfieldA = np.array([500.,500.,0.])
-    EfieldB = rp.map_E_to_height(alat, alon, 100., 4000., EfieldA)
-    print(EfieldA, EfieldB)
+    EfieldB = rp.map_E_to_height(alat, alon, altA, altB, EfieldA)
+    VfieldA = np.array([500.,500.,0.])
+    VfieldB = rp.map_V_to_height(alat, alon, altA, altB, VfieldA)
 
     # evaluate at MAGNETIC lat/lons
-    f1, f2, f3, g1, g2, g3, d1, d2, d3, e1, e2, e3 = rp.basevectors_apex(alat, alon, 100., coords='apex')
+    f1, f2, f3, g1, g2, g3, d1, d2, d3, e1, e2, e3 = rp.basevectors_apex(alat, alon, altA, coords='apex')
     Ed1A = np.einsum('i,i->', EfieldA, e1)
     Ed2A = np.einsum('i,i->', EfieldA, e2)
+    Ve1A = np.einsum('i,i->', VfieldA, d1)
+    Ve2A = np.einsum('i,i->', VfieldA, d2)
 
-    f1, f2, f3, g1, g2, g3, d1, d2, d3, e1, e2, e3 = rp.basevectors_apex(alat, alon, 4000., coords='apex')
+    f1, f2, f3, g1, g2, g3, d1, d2, d3, e1, e2, e3 = rp.basevectors_apex(alat, alon, altB, coords='apex')
     Ed1B = np.einsum('i,i->', EfieldB, e1)
     Ed2B = np.einsum('i,i->', EfieldB, e2)
+    Ve1B = np.einsum('i,i->', VfieldB, d1)
+    Ve2B = np.einsum('i,i->', VfieldB, d2)
 
-    print('APEX:', Ed1A, Ed2A, Ed1B, Ed2B)
+    print('APEX Efield:', Ed1A, Ed2A, Ed1B, Ed2B)
+    print('APEX Velocity:', Ve1A, Ve2A, Ve1B, Ve2B)
 
 
-    d1, d2, d3, e1, e2, e3 = rp.basevectors_marp(alat, alon, 100., coords='apex')
+    d1, d2, d3, e1, e2, e3 = rp.basevectors_marp(alat, alon, altA, coords='apex')
     Ed1A = np.einsum('i,i->', EfieldA, e1)
     Ed2A = np.einsum('i,i->', EfieldA, e2)
+    Ve1A = np.einsum('i,i->', VfieldA, d1)
+    Ve2A = np.einsum('i,i->', VfieldA, d2)
 
-    d1, d2, d3, e1, e2, e3 = rp.basevectors_marp(alat, alon, 4000., coords='apex')
+    d1, d2, d3, e1, e2, e3 = rp.basevectors_marp(alat, alon, altB, coords='apex')
     Ed1B = np.einsum('i,i->', EfieldB, e1)
     Ed2B = np.einsum('i,i->', EfieldB, e2)
+    Ve1B = np.einsum('i,i->', VfieldB, d1)
+    Ve2B = np.einsum('i,i->', VfieldB, d2)
 
-    print('MARP:', Ed1A, Ed2A, Ed1B, Ed2B)
+    print('MARP Efield:', Ed1A, Ed2A, Ed1B, Ed2B)
+    print('MARP Velocity:', Ve1A, Ve2A, Ve1B, Ve2B)
 
 
 def main():

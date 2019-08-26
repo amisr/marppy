@@ -2,8 +2,7 @@
 
 import numpy as np
 from apexpy import Apex
-import pymap3d as pm
-import marp as M
+from marp import Marp
 
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
@@ -58,10 +57,13 @@ def coord_map():
     marp_lon = []
     marp_title = []
     for (lat0, lon0) in [(0.,60.), (30.,60.), (60.,60.), (90.,60.)]:
-        rplat, rplon = M.ma2marp(lat, lon, lat0, lon0)
-        marp_d1, marp_d2, marp_d3 = M.base_vectors(lat, lon, lat0, lon0)
+        M = Marp(date=2019, lam0=lat0, phi0=lon0)
+
+        rplat, rplon = M.apex2marp(lat, lon)
+        marp_d1, marp_d2, marp_d3, marp_e1, marp_e2, marp_e3 = M.basevectors_marp(lat, lon, 0., coords='apex')
         marp_d1xd2 = np.cross(marp_d1.T, marp_d2.T).T
-        marp_D = np.linalg.norm(marp_d1xd2, axis=0)
+        # marp_D = np.linalg.norm(marp_d1xd2, axis=0)
+        marp_D = np.linalg.norm(marp_e3, axis=0)
         marp_d12 = np.einsum('i...,i...->...', marp_d1, marp_d1)/marp_D
         marp_d1d2 = np.einsum('i...,i...->...', marp_d1, marp_d2)/marp_D
         marp_d22 = np.einsum('i...,i...->...', marp_d2, marp_d2)/marp_D
