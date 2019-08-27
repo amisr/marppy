@@ -62,8 +62,8 @@ def coord_map():
         rplat, rplon = M.apex2marp(lat, lon)
         marp_d1, marp_d2, marp_d3, marp_e1, marp_e2, marp_e3 = M.basevectors_marp(lat, lon, 0., coords='apex')
         marp_d1xd2 = np.cross(marp_d1.T, marp_d2.T).T
-        # marp_D = np.linalg.norm(marp_d1xd2, axis=0)
-        marp_D = np.linalg.norm(marp_e3, axis=0)
+        marp_D = np.linalg.norm(marp_d1xd2, axis=0)
+        # marp_D = np.linalg.norm(marp_e3, axis=0)
         marp_d12 = np.einsum('i...,i...->...', marp_d1, marp_d1)/marp_D
         marp_d1d2 = np.einsum('i...,i...->...', marp_d1, marp_d2)/marp_D
         marp_d22 = np.einsum('i...,i...->...', marp_d2, marp_d2)/marp_D

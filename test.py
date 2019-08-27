@@ -34,9 +34,20 @@ def test_basevectors():
 
     d1xd2 = np.cross(d1.T, d2.T).T
     d1xd2d3 = np.einsum('i...,i...->...', d1xd2, d3)
+    print('d1xd2.d3', np.mean(d1xd2d3))
 
-    # print('d3-d1xd2', d3-d1xd2/np.linalg.norm(d1xd2, axis=0)**2)
-    print('e3-d1xd2', np.mean(e3-d1xd2/d1xd2d3, axis=1))
+    e1xe2 = np.cross(e1.T, e2.T).T
+    e1xe2e3 = np.einsum('i...,i...->...', e1xe2, e3)
+    print('e1xe2.e3', np.mean(e1xe2e3))
+
+    print('e3-d1xd2', np.mean(e3-d1xd2, axis=1))
+    print('d3-e1xe2', np.mean(d3-e1xe2, axis=1))
+
+    print('e1-d2xd3', np.mean(e1-np.cross(d2.T, d3.T).T, axis=1))
+    print('d1-e2xe3', np.mean(d1-np.cross(e2.T, e3.T).T, axis=1))
+
+    print('e2-d3xd1', np.mean(e2-np.cross(d3.T, d1.T).T, axis=1))
+    print('d2-e3xe1', np.mean(d2-np.cross(e3.T, e1.T).T, axis=1))
 
     print('d1.e1', np.mean(np.einsum('i...,i...->...', d1, e1)))
     print('d1.e2', np.mean(np.einsum('i...,i...->...', d1, e2)))

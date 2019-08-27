@@ -84,18 +84,20 @@ class Marp(Apex):
         dprdl = (np.sin(phir+phi0)*np.cos(lam0)*np.sin(lam)*np.cos(phi) - np.sin(phir+phi0)*np.sin(lam0)*np.cos(lam) - np.cos(phir+phi0)*np.sin(lam)*np.sin(phi))/np.cos(lamr)
         dlrdp = (np.sin(lam0)*np.cos(lam)*np.sin(phi))/np.cos(lamr)
         dlrdl = (np.sin(lam0)*np.sin(lam)*np.cos(phi) + np.cos(lam0)*np.cos(lam))/np.cos(lamr)
+        D = 1./np.sqrt(dprdp*dlrdl - dprdl*dlrdp)
 
-        d1r = dprdp*d1 + dprdl*d2
-        d2r = dlrdp*d1 + dlrdl*d2
+        d1r = (dprdp*d1 + dprdl*d2)*D
+        d2r = (dlrdp*d1 + dlrdl*d2)*D
         d3r = d3
 
         dpdpr = (np.cos(phi)*np.cos(lamr)*np.cos(phi0+phir) + np.cos(lam0)*np.sin(phi)*np.cos(lamr)*np.sin(phi0+phir))/np.cos(lam)
         dpdlr = (-np.cos(phi)*np.sin(lamr)*np.sin(phi0+phir) + np.cos(lam0)*np.sin(phi)*np.sin(lamr)*np.cos(phi0+phir) + np.sin(lam0)*np.sin(phi)*np.cos(lamr))/np.cos(lam)
         dldpr = (-np.sin(lam0)*np.cos(lamr)*np.sin(phi0+phir))/np.cos(lam)
         dldlr = (-np.sin(lam0)*np.sin(lamr)*np.cos(phi0+phir) + np.cos(lam0)*np.cos(lamr))/np.cos(lam)
+        D = np.sqrt(dpdpr*dldlr - dldpr*dpdlr)
 
-        e1r = dpdpr*e1 + dldpr*e2
-        e2r = dpdlr*e1 + dldlr*e2
+        e1r = (dpdpr*e1 + dldpr*e2)/D
+        e2r = (dpdlr*e1 + dldlr*e2)/D
         e3r = e3
 
         return d1r, d2r, d3r, e1r, e2r, e3r
