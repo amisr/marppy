@@ -48,7 +48,7 @@ def coord_map():
     d12 = np.einsum('i...,i...->...', d1, d1)/D
     d1d2 = np.einsum('i...,i...->...', d1, d2)/D
     d22 = np.einsum('i...,i...->...', d2, d2)/D
-    apex = [lat, D, d12, d1d2, d22]
+    apex = [np.arange(len(lat)), D, d12, d1d2, d22]
     labels = ['MLAT', r'$D$', r'$d_1^2/D$', r'$d_1\cdot d_2/D$', r'$d_2^2/D$']
 
 
@@ -67,7 +67,7 @@ def coord_map():
         marp_d12 = np.einsum('i...,i...->...', marp_d1, marp_d1)/marp_D
         marp_d1d2 = np.einsum('i...,i...->...', marp_d1, marp_d2)/marp_D
         marp_d22 = np.einsum('i...,i...->...', marp_d2, marp_d2)/marp_D
-        marp.append([lat, marp_D, marp_d12, marp_d1d2, marp_d22])
+        marp.append([np.arange(len(lat)), marp_D, marp_d12, marp_d1d2, marp_d22])
         marp_lat.append(rplat)
         marp_lon.append(rplon)
         marp_title.append('({}, {})'.format(lat0,lon0))
