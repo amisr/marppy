@@ -2,7 +2,7 @@
 
 import numpy as np
 from marp import Marp
-from apexpy import Apex
+from apexpy import Apex, ApexHeightError
 import pymap3d as pm
 
 import matplotlib.pyplot as plt
@@ -13,19 +13,13 @@ import cartopy.crs as ccrs
 
 def basevector_direction():
 
-    glon = np.arange(0., 90., 10.)
-    glat = np.full(glon.shape, 80.)
-    galt = np.full(glon.shape, 300.)
-
-    # apex = Apex(date=2019)
-    # f1, f2, f3, g1, g2, g3, d1, d2, d3, e1, e2, e3 = apex.basevectors_apex(glat, glon, galt)
-    # print(apex.geo2apex(glat, glon, galt))
+    glat, glon = np.meshgrid(np.arange(-90., 90., 20.), np.arange(-180., 180., 30.))
+    glat = glat.flatten()
+    glon = glon.flatten()
+    galt = np.full(glat.shape, 300.)
 
     marp = Marp(date=2019, lam0=80., phi0=45., geo=True)
     d1, d2, d3, e1, e2, e3 = marp.basevectors_marp(glat, glon, galt)
-    print(marp.geo2marp(glat, glon, galt))
-
-    # print(marp.geo2marp(80., 45., 300.))
 
     x, y, z = pm.geodetic2ecef(glat, glon, galt*1000.)
     e1x, e1y, e1z = pm.enu2uvw(e1[0], e1[1], e1[2], glat, glon)
@@ -36,25 +30,21 @@ def basevector_direction():
     ax = fig.add_subplot(111,projection='3d')
 
     ax.scatter(x, y, z)
-    ax.quiver(x, y, z, e1x*1000000., e1y*1000000., e1z*1000000.)
-    ax.quiver(x, y, z, e2x*1000000., e2y*1000000., e2z*1000000.)
-    # for x, y, z, vx, vy, vz in zip(field.X, field.Y, field.Z, field.Vx, field.Vy, field.Vz):
-    #     ax.quiver(x, y, z, vx, vy, vz, length=0.4*np.sqrt(vx**2+vy**2+vz**2), linewidths=0.5, color='lightgreen')
+    ax.quiver(x, y, z, e1x*1000000., e1y*1000000., e1z*1000000., color='b')
+    ax.quiver(x, y, z, e2x*1000000., e2y*1000000., e2z*1000000., color='g')
+    ax.quiver(x, y, z, e3x*1000000., e3y*1000000., e3z*1000000., color='r')
 
-    u = np.linspace(0, 2 * np.pi, 100)
-    v = np.linspace(0, np.pi, 100)
-    x = 6371000. * np.outer(np.cos(u), np.sin(v))
-    y = 6371000. * np.outer(np.sin(u), np.sin(v))
-    z = 6371000. * np.outer(np.ones(np.size(u)), np.cos(v))
-    ax.plot_surface(x, y, z, color='r')
+    glat, glon, _ = marp.marp2geo(0., 0., 300.)
+    x, y, z = pm.geodetic2ecef(glat, glon, galt)
+    ax.scatter(x, y, z, marker='^', s=100.)
 
     plt.show()
 
 def meridians_apex(basevectors=False):
 
-    apexlat = np.arange(-80., 81., 20.)
+    apexlat = np.arange(-75., 76., 30.)
     apexlon = np.arange(0., 360., 60.)
-    galt = 0.
+    galt = 300.
 
     apex = Apex(date=2019)
 
@@ -73,14 +63,14 @@ def meridians_apex(basevectors=False):
         # x, y, z = pm.geodetic2ecef(alat, alon, np.full(alat.shape, galt*1000.))
         ax.plot(x, y, z)
 
-    # plot magnetic longitude lines
-    alat = np.arange(-90., 91., 1.)
-    for alon in apexlon:
-        glat, glon, _ = apex.apex2geo(alat, alon, galt)
-
-        x, y, z = pm.geodetic2ecef(glat, glon, np.full(glat.shape, galt*1000.))
-        # x, y, z = pm.geodetic2ecef(alat, alon, np.full(alat.shape, galt*1000.))
-        ax.plot(x, y, z)
+    # # plot magnetic longitude lines
+    # alat = np.arange(-90., 91., 1.)
+    # for alon in apexlon:
+    #     glat, glon, _ = apex.apex2geo(alat, alon, galt)
+    #
+    #     x, y, z = pm.geodetic2ecef(glat, glon, np.full(glat.shape, galt*1000.))
+    #     # x, y, z = pm.geodetic2ecef(alat, alon, np.full(alat.shape, galt*1000.))
+    #     ax.plot(x, y, z)
 
     if basevectors:
         alat, alon = np.meshgrid(apexlat, apexlon)
@@ -106,12 +96,12 @@ def meridians_apex(basevectors=False):
         d3x, d3y, d3z = pm.enu2uvw(d3[0], d3[1], d3[2], glat, glon)
 
         ax.scatter(x, y, z)
-        ax.quiver(x, y, z, e1x*1000000., e1y*1000000., e1z*1000000., color='b')
-        ax.quiver(x, y, z, e2x*1000000., e2y*1000000., e2z*1000000., color='g')
-        ax.quiver(x, y, z, e3x*1000000., e3y*1000000., e3z*1000000., color='r')
-        # ax.quiver(x, y, z, d1x*1000000., d1y*1000000., d1z*1000000., color='b')
-        # ax.quiver(x, y, z, d2x*1000000., d2y*1000000., d2z*1000000., color='g')
-        # ax.quiver(x, y, z, d3x*1000000., d3y*1000000., d3z*1000000., color='r')
+        # ax.quiver(x, y, z, e1x*1000000., e1y*1000000., e1z*1000000., color='b')
+        # ax.quiver(x, y, z, e2x*1000000., e2y*1000000., e2z*1000000., color='g')
+        # ax.quiver(x, y, z, e3x*1000000., e3y*1000000., e3z*1000000., color='r')
+        ax.quiver(x, y, z, d1x*1000000., d1y*1000000., d1z*1000000., color='b')
+        ax.quiver(x, y, z, d2x*1000000., d2y*1000000., d2z*1000000., color='g')
+        ax.quiver(x, y, z, d3x*1000000., d3y*1000000., d3z*1000000., color='r')
 
     plt.show()
 
@@ -122,7 +112,7 @@ def meridians_marp(basevectors=False):
     galt = 0.
 
     # marp = Marp(date=2019, lam0=83.7, phi0=-26.1)
-    marp = Marp(date=2019, lam0=90, phi0=0.)
+    marp = Marp(date=2019, lam0=30., phi0=0.)
 
     fig = plt.figure(figsize=(10,10))
     ax = fig.add_subplot(111,projection='3d')
@@ -139,14 +129,14 @@ def meridians_marp(basevectors=False):
         x, y, z = pm.geodetic2ecef(glat, glon, np.full(glat.shape, galt*1000.))
         ax.plot(x, y, z, linewidth=0.5)
 
-    # plot magnetic longitude lines
-    mlat = np.arange(-90., 91., 1.)
-    for mlon in marplon:
-        glat, glon, _ = marp.marp2geo(mlat, mlon, galt)
-        # glat, glon = marp.marp2apex(mlat, mlon)
-
-        x, y, z = pm.geodetic2ecef(glat, glon, np.full(glat.shape, galt*1000.))
-        ax.plot(x, y, z, linewidth=0.5)
+    # # plot magnetic longitude lines
+    # mlat = np.arange(-90., 91., 1.)
+    # for mlon in marplon:
+    #     glat, glon, _ = marp.marp2geo(mlat, mlon, galt)
+    #     # glat, glon = marp.marp2apex(mlat, mlon)
+    #
+    #     x, y, z = pm.geodetic2ecef(glat, glon, np.full(glat.shape, galt*1000.))
+    #     ax.plot(x, y, z, linewidth=0.5)
 
     if basevectors:
         mlat, mlon = np.meshgrid(marplat, marplon)
@@ -216,7 +206,7 @@ def horiz_vert_components():
 
     # apex = Apex(date=2019)
     # f1, f2, f3, g1, g2, g3, d1, d2, d3, e1, e2, e3 = apex.basevectors_apex(glat.flatten(), glon.flatten(), 300.)
-    marp = Marp(date=2019, lam0=1., phi0=0.)
+    marp = Marp(date=2019, lam0=40., phi0=0.)
     d1, d2, d3, e1, e2, e3 = marp.basevectors_marp(glat.flatten(), glon.flatten(), 300.)
 
     fig = plt.figure(figsize=(15,10))
@@ -316,16 +306,20 @@ def check_scaling():
     glat, glon = np.meshgrid(np.arange(-90., 91., 1.), np.arange(0., 361., 2.))
     # mlat = mlat.flatten()
     # mlon = mlon.flatten()
-    galt = 0.
+    galt = 300.
 
     # marp = Marp(date=2019, lam0=75., phi0=-91., alt=300, geo=True)
     lam0 = 83.7
     phi0 = -26.1
-    marp = Marp(date=2019, lam0=0., phi0=0.)
+    marp = Marp(date=2019, lam0=10., phi0=0.)
     # glat, glon, _ = marp.marp2geo(mlat.flatten(), mlon.flatten(), galt)
     d1, d2, d3, e1, e2, e3 = marp.basevectors_marp(glat.flatten(), glon.flatten(), galt)
     # f1, f2, f3, g1, g2, g3, d1, d2, d3, e1, e2, e3 = marp.basevectors_apex(glat.flatten(), glon.flatten(), galt)
-    c = np.einsum('i...,i...->...',np.cross(d1.T,d2.T).T,d3).reshape(glat.shape)
+    # c = np.einsum('i...,i...->...',np.cross(d1.T,d2.T).T,d3).reshape(glat.shape)
+    c = np.linalg.norm(np.cross(d1.T,d2.T).T)/np.linalg.norm(e3)
+
+    # np.testing.assert_array_almost_equal(np.einsum('i...,i...->...',np.cross(d1.T,d2.T).T,d3), np.ones(glat.flatten().shape), decimal=2)
+
 
     print(c[np.abs(c-1.0)>0.0001])
     print(c.shape, d1.shape, glat.shape)
@@ -339,7 +333,7 @@ def check_scaling():
         # h = np.sqrt(e[0,:]**2+e[1,:]**2).reshape(glat.shape)
 
     ax = plt.subplot(gs[0], projection=ccrs.Mollweide())
-    c = ax.contourf(glon, glat, c, 2, vmin=-1., vmax=1., cmap=plt.get_cmap('seismic'), transform=ccrs.PlateCarree())
+    c = ax.scatter(glon, glat, c=c, s=1., cmap=plt.get_cmap('jet'), transform=ccrs.PlateCarree())
     # ax.set_title('{} Horizontal'.format(name))
     plt.colorbar(c)
 
@@ -352,8 +346,8 @@ def main():
     # basevector_direction()
     # meridians_apex(basevectors=True)
     # meridians_marp(basevectors=True)
-    zoom()
-    # horiz_vert_components()
+    # zoom()
+    horiz_vert_components()
     # covariant_direction()
     # check_scaling()
 

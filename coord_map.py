@@ -63,7 +63,6 @@ def coord_map():
         marp_d1, marp_d2, marp_d3, marp_e1, marp_e2, marp_e3 = M.basevectors_marp(lat, lon, 0., coords='apex')
         marp_d1xd2 = np.cross(marp_d1.T, marp_d2.T).T
         marp_D = np.linalg.norm(marp_d1xd2, axis=0)
-        # marp_D = np.linalg.norm(marp_e3, axis=0)
         marp_d12 = np.einsum('i...,i...->...', marp_d1, marp_d1)/marp_D
         marp_d1d2 = np.einsum('i...,i...->...', marp_d1, marp_d2)/marp_D
         marp_d22 = np.einsum('i...,i...->...', marp_d2, marp_d2)/marp_D
@@ -80,15 +79,17 @@ def coord_map():
     for i in range(len(apex)):
         ax = plt.subplot(gs[i,0], projection=ccrs.Mollweide())
         c = ax.scatter(lon, lat, c=apex[i], cmap=plt.get_cmap('jet'), s=2.5, transform=ccrs.PlateCarree())
+        # c = ax.scatter(lon, lat, c=apex[i], cmap=plt.get_cmap('jet'), vmin=-1, vmax=1, s=2.5, transform=ccrs.PlateCarree())
         ax.set_title('Apex')
         ax.text(-0.25, 0.5, labels[i], transform=ax.transAxes)
 
         for j in range(len(marp)):
             ax = plt.subplot(gs[i,j+1], projection=ccrs.Mollweide())
             ax.scatter(marp_lon[j], marp_lat[j], c=marp[j][i], vmin=min(apex[i]), vmax=max(apex[i]), cmap=plt.get_cmap('jet'), s=2.5, transform=ccrs.PlateCarree())
+            # ax.scatter(marp_lon[j], marp_lat[j], c=marp[j][i], vmin=-1, vmax=1, cmap=plt.get_cmap('jet'), s=2.5, transform=ccrs.PlateCarree())
             ax.set_title(marp_title[j])
 
-        axpos = ax.get_position() # get the original position 
+        axpos = ax.get_position() # get the original position
         cax = fig.add_axes([axpos.x1 + 0.01, axpos.y0,  0.02, axpos.y1-axpos.y0])
         plt.colorbar(c, cax=cax)
 
