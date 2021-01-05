@@ -2,7 +2,8 @@
 
 import unittest
 import numpy as np
-from marp import Marp, Apex
+from marppy import Marp
+from apexpy import Apex
 
 class TestMarp(unittest.TestCase):
 
@@ -135,8 +136,8 @@ class TestMarp(unittest.TestCase):
 
         d1, d2, d3, e1, e2, e3 = marp.basevectors_marp(glat.flatten(), glon.flatten(), 0.)
 
-        np.testing.assert_array_almost_equal(np.einsum('i...,i...->...',np.cross(d1.T,d2.T).T,d3), np.ones(glat.flatten().shape), decimal=2)
-        np.testing.assert_array_almost_equal(np.einsum('i...,i...->...',np.cross(e1.T,e2.T).T,e3), np.ones(glat.flatten().shape), decimal=2)
+        np.testing.assert_array_almost_equal(np.einsum('i...,i...->...',np.cross(d1.T,d2.T).T,d3), np.ones(glat.flatten().shape), decimal=4)
+        np.testing.assert_array_almost_equal(np.einsum('i...,i...->...',np.cross(e1.T,e2.T).T,e3), np.ones(glat.flatten().shape), decimal=4)
 
 
     def test_basevectors_parallel2B(self):
