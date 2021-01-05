@@ -2,17 +2,16 @@
 
 import numpy as np
 from apexpy import Apex
-import pymap3d as pm
 
 RE = 6371.
 hR = 0.
 
 class Marp(Apex):
-    def __init__(self, date=None, refh=0, datafile=None, lam0=0., phi0=0., alt=300., geo=False):
+    def __init__(self, date=None, refh=0, datafile=None, lam0=0., phi0=0., alt=300., coords='apex'):
 
         super(Marp, self).__init__(date=date, refh=refh, datafile=None)
 
-        if geo:
+        if coords == 'geo':
             lam0, phi0 = self.geo2apex(lam0, phi0, alt)
 
         self.lam0 = lam0
