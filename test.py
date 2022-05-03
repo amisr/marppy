@@ -98,18 +98,19 @@ class TestMarp(unittest.TestCase):
         # validate that the basevectors are reciprocal, i.e. di*ej=delta{ij} (Richmond 1995, eqn 3.18)
         marp = Marp(date=2019, lam0=60., phi0=30.)
         glat, glon = np.meshgrid(np.arange(-89., 90., 2.), np.arange(-179., 180., 4.))
+        # glat, glon = np.meshgrid(np.arange(30., 90., 2.), np.arange(-179., 180., 4.))
 
         d1, d2, d3, e1, e2, e3 = marp.basevectors_marp(glat.flatten(), glon.flatten(), 0.)
 
-        np.testing.assert_array_almost_equal(np.einsum('i...,i...->...',d1,e1), np.ones(glat.flatten().shape), decimal=4)
-        np.testing.assert_array_almost_equal(np.einsum('i...,i...->...',d1,e2), np.zeros(glat.flatten().shape), decimal=4)
-        np.testing.assert_array_almost_equal(np.einsum('i...,i...->...',d1,e3), np.zeros(glat.flatten().shape), decimal=4)
-        np.testing.assert_array_almost_equal(np.einsum('i...,i...->...',d2,e1), np.zeros(glat.flatten().shape), decimal=4)
-        np.testing.assert_array_almost_equal(np.einsum('i...,i...->...',d2,e2), np.ones(glat.flatten().shape), decimal=4)
-        np.testing.assert_array_almost_equal(np.einsum('i...,i...->...',d2,e3), np.zeros(glat.flatten().shape), decimal=4)
-        np.testing.assert_array_almost_equal(np.einsum('i...,i...->...',d3,e1), np.zeros(glat.flatten().shape), decimal=4)
-        np.testing.assert_array_almost_equal(np.einsum('i...,i...->...',d3,e2), np.zeros(glat.flatten().shape), decimal=4)
-        np.testing.assert_array_almost_equal(np.einsum('i...,i...->...',d3,e3), np.ones(glat.flatten().shape), decimal=4)
+        np.testing.assert_array_almost_equal(np.einsum('i...,i...->...',d1,e1), np.ones(glat.flatten().shape), decimal=3)
+        np.testing.assert_array_almost_equal(np.einsum('i...,i...->...',d1,e2), np.zeros(glat.flatten().shape), decimal=3)
+        np.testing.assert_array_almost_equal(np.einsum('i...,i...->...',d1,e3), np.zeros(glat.flatten().shape), decimal=3)
+        np.testing.assert_array_almost_equal(np.einsum('i...,i...->...',d2,e1), np.zeros(glat.flatten().shape), decimal=3)
+        np.testing.assert_array_almost_equal(np.einsum('i...,i...->...',d2,e2), np.ones(glat.flatten().shape), decimal=3)
+        np.testing.assert_array_almost_equal(np.einsum('i...,i...->...',d2,e3), np.zeros(glat.flatten().shape), decimal=3)
+        np.testing.assert_array_almost_equal(np.einsum('i...,i...->...',d3,e1), np.zeros(glat.flatten().shape), decimal=3)
+        np.testing.assert_array_almost_equal(np.einsum('i...,i...->...',d3,e2), np.zeros(glat.flatten().shape), decimal=3)
+        np.testing.assert_array_almost_equal(np.einsum('i...,i...->...',d3,e3), np.ones(glat.flatten().shape), decimal=3)
 
 
     # def test_general_co_contra_relationship(self):
@@ -157,17 +158,18 @@ class TestMarp(unittest.TestCase):
         # validate that the relationships between d and e shown in Richmond 1995, eqn 3.16
         #   and Laundal and Richmond 2016, eqn 57-59 hold true
         marp = Marp(date=2019, lam0=60., phi0=30.)
-        glat, glon = np.meshgrid(np.arange(-89., 90., 2.), np.arange(-179., 180., 4.))
+        # glat, glon = np.meshgrid(np.arange(-89., 90., 2.), np.arange(-179., 180., 4.))
+        glat, glon = np.meshgrid(np.arange(30., 90., 2.), np.arange(-179., 180., 4.))
 
         d1, d2, d3, e1, e2, e3 = marp.basevectors_marp(glat.flatten(), glon.flatten(), 0.)
 
-        np.testing.assert_almost_equal(np.cross(e2.T, e3.T).T, d1, decimal=4)
-        np.testing.assert_almost_equal(np.cross(e3.T, e1.T).T, d2, decimal=4)
-        np.testing.assert_almost_equal(np.cross(e1.T, e2.T).T, d3, decimal=4)
+        np.testing.assert_almost_equal(np.cross(e2.T, e3.T).T, d1, decimal=5)
+        np.testing.assert_almost_equal(np.cross(e3.T, e1.T).T, d2, decimal=5)
+        np.testing.assert_almost_equal(np.cross(e1.T, e2.T).T, d3, decimal=5)
 
-        np.testing.assert_almost_equal(np.cross(d2.T, d3.T).T, e1, decimal=4)
-        np.testing.assert_almost_equal(np.cross(d3.T, d1.T).T, e2, decimal=4)
-        np.testing.assert_almost_equal(np.cross(d1.T, d2.T).T, e3, decimal=4)
+        np.testing.assert_almost_equal(np.cross(d2.T, d3.T).T, e1, decimal=5)
+        np.testing.assert_almost_equal(np.cross(d3.T, d1.T).T, e2, decimal=5)
+        np.testing.assert_almost_equal(np.cross(d1.T, d2.T).T, e3, decimal=5)
 
     def test_mapping(self):
         # validate that for an Electric field mapped to different altitudes, Ed1 and Ed2 are constant and

@@ -44,7 +44,7 @@ def covariant_derivatives():
     dpdpr = cos(lr)*(cos(l0)*cos(lr)-sin(l0)*sin(lr)*cos(pr))/(x**2+y**2)
     dpdlr = sin(l0)*sin(pr)/(x**2+y**2)
     dldpr = -sin(l0)*cos(lr)*sin(pr)/sqrt(1-z**2)
-    dldlr = (-sin(l0)*sin(lr)*cos(pr)+cos(l0)*cos(lr))/sqrt(1-z**2)
+    dldlr = (cos(l0)*cos(lr)-sin(l0)*sin(lr)*cos(pr))/sqrt(1-z**2)
 
     print('COVARIANT DERIVATIVES')
     print('dpdpr:', simplify(diff(p, pr)-dpdpr))
