@@ -32,7 +32,10 @@ class Marp(Apex):
         phir = np.arctan2(yr, xr)
         lamr = np.arcsin(zr)
 
-        return lamr*180./np.pi, phir*180./np.pi
+        mlat = lamr*180./np.pi
+        mlon = phir*180./np.pi
+
+        return mlat, mlon
 
     def marp2apex(self, lamr, phir):
 
@@ -48,7 +51,10 @@ class Marp(Apex):
         phi = np.arctan2(y, x)
         lam = np.arcsin(z)
 
-        return lam*180./np.pi, phi*180./np.pi
+        alat = lam*180./np.pi
+        alon = phi*180./np.pi
+
+        return alat, alon
 
     def geo2marp(self, glat, glon, height):
         alat, alon = self.geo2apex(glat, glon, height)
