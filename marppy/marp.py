@@ -7,6 +7,54 @@ RE = 6371.
 hR = 0.
 
 class Marp(Apex):
+    """
+    Performs coordinate conversions and base vector calculations.  Inherets
+    :class:`apexpy.Apex` class.
+
+    Parameters
+    ----------
+    date : float, :class:`dt.date`, or :class:`dt.datetime`, optional
+        Determines which IGRF coefficients are used in conversions. Uses
+        current date as default.  If float, use decimal year.
+    refh : float, optional
+        Reference height in km for apex coordinates (the field lines are mapped
+        to this height)
+    datafile : str, optional
+        Path to custom coefficient file
+    lam0 : float, optional
+        Latitude of MARP origin in either Apex or geodetic coordinates
+    phi0 : float, optional
+        Longitude of MARP origin in either Apex or geodetic coordinates
+    alt : float, optional
+        Altitude of MARP origin location if it is specified in geodetic
+        coordinates (does nothing if origin specified in Apex coordinates)
+    coords : str, optional
+        Coordinate system MARP origin is specified in
+
+    Attributes
+    ----------
+    year : float
+        Decimal year used for the IGRF model
+    refh : float
+        Reference height in km for apex coordinates
+    datafile : str
+        Path to coefficient file
+    lam0 : float
+        Apex latitude of the MARP origin
+    phi0 : float
+        Apex longitude of the MARP origin
+
+    Notes
+    -----
+    The calculations use IGRF-13 with coefficients from 1900 to 2025 [1]_.
+    The geodetic reference ellipsoid is WGS84.
+
+    References
+    ----------
+    .. [1] Thébault, E. et al. (2015), International Geomagnetic Reference
+           Field: the 12th generation, Earth, Planets and Space, 67(1), 79,
+           :doi:`10.1186/s40623-015-0228-9`.
+    """
     def __init__(self, date=None, refh=0, datafile=None, lam0=0., phi0=0., alt=300., coords='apex'):
 
         super(Marp, self).__init__(date=date, refh=refh, datafile=None)
@@ -18,10 +66,27 @@ class Marp(Apex):
         self.phi0 = phi0
 
 
-    def apex2marp(self, lam, phi):
+    def apex2marp(self, alat, alon):
+        """
+        Converts Apex to MARP coordinates.
 
-        lam = lam*np.pi/180.
-        phi = phi*np.pi/180.
+        Parameters
+        ----------
+        alat : array_like
+            Apex latitude
+        alon : array_like
+            Apex longitude
+
+        Returns
+        -------
+        mlat : ndarray or float
+            MARP latitude
+        mlon : ndarray or float
+            MARP longitude
+        """
+
+        lam = alat*np.pi/180.
+        phi = alon*np.pi/180.
         lam0 = self.lam0*np.pi/180.
         phi0 = self.phi0*np.pi/180.
 
@@ -37,10 +102,27 @@ class Marp(Apex):
 
         return mlat, mlon
 
-    def marp2apex(self, lamr, phir):
+    def marp2apex(self, mlat, mlon):
+        """
+        Converts MARP to Apex coordinates.
 
-        lamr = lamr*np.pi/180.
-        phir = phir*np.pi/180.
+        Parameters
+        ----------
+        mlat : ndarray or float
+            MARP latitude
+        mlon : ndarray or float
+            MARP longitude
+
+        Returns
+        -------
+        alat : array_like
+            Apex latitude
+        alon : array_like
+            Apex longitude
+        """
+
+        lamr = mlat*np.pi/180.
+        phir = mlon*np.pi/180.
         lam0 = self.lam0*np.pi/180.
         phi0 = self.phi0*np.pi/180.
 
@@ -57,17 +139,87 @@ class Marp(Apex):
         return alat, alon
 
     def geo2marp(self, glat, glon, height):
+        """
+        Converts Geodetic to MARP coordinates.
+
+        Parameters
+        ----------
+        glat : ndarray or float
+            Geodetic latitude
+        glon : ndarray or float
+            Geodetic longitude
+        height : array_like
+            Altitude in km
+
+        Returns
+        -------
+        mlat : ndarray or float
+            MARP latitude
+        mlon : ndarray or float
+            MARP longitude
+        """
         alat, alon = self.geo2apex(glat, glon, height)
         mlat, mlon = self.apex2marp(alat, alon)
         return mlat, mlon
 
     def marp2geo(self, mlat, mlon, height):
+        """
+        Converts MARP to Geodetic coordinates.
+
+        Parameters
+        ----------
+        mlat : ndarray or float
+            MARP latitude
+        mlon : ndarray or float
+            MARP longitude
+        height : array_like
+            Altitude in km
+
+        Returns
+        -------
+        glat : ndarray or float
+            Geodetic latitude
+        glon : ndarray or float
+            Geodetic longitude
+        err : ndarray or float
+            Error returned by :class:`apexpy.Apex.apex2geo`
+        """
         alat, alon = self.marp2apex(mlat, mlon)
         glat, glon, err = self.apex2geo(alat, alon, height)
         return glat, glon, err
 
     def basevectors_marp(self, lat, lon, height, coords='geo'):
+        """
+        Get MARP base vectors d1, d2, d3 and e1, e2, e3 at the specified
+        coordinates.
 
+        Parameters
+        ----------
+        lat : (N,) array_like or float
+            Latitude
+        lon : (N,) array_like or float
+            Longitude
+        height : (N,) array_like or float
+            Altitude in km
+        coords : {'geo', 'apex'}, optional
+            Input coordinate system
+
+        Returns
+        -------
+        d1 : (2, N) or (2,) ndarray
+            MARP base vector normal to contours of constant PhiM
+        d2 : (2, N) or (2,) ndarray
+            MARP base vector that completes the right-handed system
+        d3 : (2, N) or (2,) ndarray
+            MARP base vector normal to contours of constant lambdaM
+        e1 : (2, N) or (2,) ndarray
+            MARP base vector tangent to contours of constant V0
+        e2 : (2, N) or (2,) ndarray
+            MARP base vector that completes the right-handed system
+        e3 : (2, N) or (2,) ndarray
+            MARP base vector tangent to contours of constant PhiM
+        """
+        # CHECK ABOVE DEFINITIONS for base vectors
         if coords == 'geo':
             glat = lat
             glon = lon
