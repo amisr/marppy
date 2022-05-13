@@ -51,7 +51,7 @@ class Marp(Apex):
 
     References
     ----------
-    .. [1] Thébault, E. et al. (2015), International Geomagnetic Reference
+    .. [1] Thebault, E. et al. (2015), International Geomagnetic Reference
            Field: the 12th generation, Earth, Planets and Space, 67(1), 79,
            :doi:`10.1186/s40623-015-0228-9`.
     """
