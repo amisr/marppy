@@ -17,7 +17,7 @@ The easiest way to install marppy is from PyPI::
 Usage
 -----
 
-All functionality is available through the :class:`marppy.Marp` class. Instantiate the class with the date and the new MARP "origin" (mlat=0, mlon=0) coordinates that dictate how the coordinate system will be rotated, then use the various conversion routines::
+All functionality is available through the marppy.Marp class. Instantiate the class with the date and the new MARP "origin" (mlat=0, mlon=0) coordinates that dictate how the coordinate system will be rotated, then use the various conversion routines::
 
   >>> from marppy import Marp
   >>> M = Marp(date=2022.5, lam0=80., phi0=30.)
