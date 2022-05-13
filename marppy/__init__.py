@@ -1,3 +1,3 @@
 from .marp import Marp
 
-__version__ = "0.0.2_rc"
+__version__ = "0.0.2"
