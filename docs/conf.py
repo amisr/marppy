@@ -66,6 +66,8 @@ napoleon_use_ivar = True
 napoleon_use_rtype = False
 napoleon_use_param = False
 
+autodoc_mock_imports = ['apexpy']
+
 intersphinx_mapping = {'apexpy': ('https://apexpy.readthedocs.io/en/develop/', None)}
 
 extlinks = {'doi': ('http://dx.doi.org/%s', 'doi:')}
