@@ -58,20 +58,20 @@ html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
 
 # autodoc_mock_imports = ['apexpy']
-import mock
-import sys
-sys.modules['apexpy'] = mock.Mock(Apex=object)
-
+# import mock
 # import sys
-# from unittest.mock import MagicMock
-#
-# class Mock(MagicMock):
-#     @classmethod
-#     def __getattr__(cls, name):
-#             return Mock()
-#
-# MOCK_MODULES = ['pygtk', 'gtk', 'gobject', 'argparse', 'numpy', 'pandas']
-# sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
+# sys.modules['apexpy'] = mock.Mock(Apex=object)
+
+import sys
+from unittest.mock import MagicMock
+
+class Mock(MagicMock):
+    @classmethod
+    def __getattr__(cls, name):
+            return Mock()
+
+MOCK_MODULES = ['apexpy']
+sys.modules.update((mod_name, Mock(Apex=object)) for mod_name in MOCK_MODULES)
 
 
 pygments_style = 'trac'
