@@ -1,12 +1,13 @@
 # marp.py
 
 import numpy as np
-from apexpy import Apex
+# from apexpy import Apex
 
 RE = 6371.
 hR = 0.
 
-class Marp(Apex):
+# class Marp(Apex):
+class Marp(object):
     """
     Performs coordinate conversions and base vector calculations.  Inherets
     :class:`apexpy.Apex` class.

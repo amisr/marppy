@@ -62,16 +62,16 @@ html_static_path = ['_static']
 # import sys
 # sys.modules['apexpy'] = mock.Mock(Apex=object)
 
-import sys
-from unittest.mock import MagicMock
-
-# class Mock(MagicMock):
-#     @classmethod
-#     def __getattr__(cls, name):
-#             return Mock()
-
-MOCK_MODULES = ['apexpy']
-sys.modules.update((mod_name, MagicMock(Apex=object)) for mod_name in MOCK_MODULES)
+# # import sys
+# # from unittest.mock import MagicMock
+#
+# # class Mock(MagicMock):
+# #     @classmethod
+# #     def __getattr__(cls, name):
+# #             return Mock()
+#
+# MOCK_MODULES = ['apexpy']
+# sys.modules.update((mod_name, MagicMock(Apex=object)) for mod_name in MOCK_MODULES)
 
 
 pygments_style = 'trac'
