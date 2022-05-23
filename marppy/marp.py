@@ -1,7 +1,7 @@
 # marp.py
 
 import numpy as np
-# from apexpy import Apex
+from apexpy import Apex
 
 RE = 6371.
 hR = 0.
