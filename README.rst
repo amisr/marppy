@@ -35,4 +35,4 @@ All functionality is available through the marppy.Marp class. Instantiate the cl
 Documentation
 -------------
 
-Full documentation is available on readthedocs.
+Full documentation is available on `readthedocs <https://marppy.readthedocs.io/en/latest/index.html>`_.
