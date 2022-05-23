@@ -58,7 +58,7 @@ class Marp(Apex):
     """
     def __init__(self, date=None, refh=0, datafile=None, lam0=0., phi0=0., alt=300., coords='apex'):
 
-        # super(Marp, self).__init__(date=date, refh=refh, datafile=None)
+        super(Marp, self).__init__(date=date, refh=refh, datafile=None)
 
         if coords == 'geo':
             lam0, phi0 = self.geo2apex(lam0, phi0, alt)
