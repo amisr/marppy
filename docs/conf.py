@@ -58,9 +58,9 @@ html_theme = 'sphinx_rtd_theme'
 # html_static_path = ['_static']
 
 autodoc_mock_imports = ['apexpy']
-import mock
-import sys
-sys.modules['apexpy'] = mock.Mock(Apex=object)
+# import mock
+# import sys
+# sys.modules['apexpy'] = mock.Mock(Apex=object)
 
 # # import sys
 # # from unittest.mock import MagicMock
