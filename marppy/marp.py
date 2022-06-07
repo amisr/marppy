@@ -55,7 +55,7 @@ class Marp(Apex):
            Field: the 12th generation, Earth, Planets and Space, 67(1), 79,
            :doi:`10.1186/s40623-015-0228-9`.
     """
-    def __init__(self, date=None, refh=0, datafile=None, lam0=0., phi0=0., alt=300., coords='apex'):
+    def __init__(self, date=None, refh=0, datafile=None, lam0=0., phi0=0., tau0=0., null=None, alt=300., coords='apex'):
 
         super(Marp, self).__init__(date=date, refh=refh, datafile=None)
 
@@ -64,6 +64,29 @@ class Marp(Apex):
 
         self.lam0 = lam0
         self.phi0 = phi0
+        self.tau0 = tau0+180.
+        # tau = angle between original pole and new null
+
+        # self.null2pole(null)
+
+    def null2pole(self, null):
+        lam1 = null[0]*np.pi/180.
+        phi1 = null[1]*np.pi/180.
+        beta = null[2]*np.pi/180.
+
+        lam2 = np.arcsin(np.cos(lam1)*np.cos(beta))
+        phi2 = phi1 + np.arctan2(np.sin(beta)*np.cos(lam1), -np.sin(lam1)*np.sin(lam2))
+
+        # c = lam1
+        # a = lam2
+        # tau = np.arccos(np.cos(c)/np.sin(a))
+        # print(c*180./np.pi, a*180./np.pi, np.cos(c)/np.sin(a), tau*180./np.pi)
+        tau = np.arcsin(np.sin(np.pi/2-lam1)/np.sin(np.pi/2-lam2)*np.sin(beta)) - np.pi
+        print(np.sin(lam1), np.sin(lam2), np.sin(beta), tau*180/np.pi)
+
+        self.lam0 = lam2*180./np.pi
+        self.phi0 = phi2*180./np.pi
+        self.tau0 = tau*180./np.pi
 
 
     def apex2marp(self, alat, alon):
@@ -85,20 +108,42 @@ class Marp(Apex):
             MARP longitude
         """
 
-        lam = alat*np.pi/180.
-        phi = alon*np.pi/180.
+        lamA = alat*np.pi/180.
+        phiA = alon*np.pi/180.
         lam0 = self.lam0*np.pi/180.
         phi0 = self.phi0*np.pi/180.
+        tau0 = self.tau0*np.pi/180.
+        the0 = np.pi/2.-lam0
 
-        xr = np.cos(lam0)*np.cos(lam)*np.cos(phi-phi0) + np.sin(lam0)*np.sin(lam)
-        yr = np.cos(lam)*np.sin(phi-phi0)
-        zr = -np.sin(lam0)*np.cos(lam)*np.cos(phi-phi0) + np.cos(lam0)*np.sin(lam)
+        # xr = np.cos(lam0)*np.cos(lam)*np.cos(phi-phi0) + np.sin(lam0)*np.sin(lam)
+        # yr = np.cos(lam)*np.sin(phi-phi0)
+        # zr = -np.sin(lam0)*np.cos(lam)*np.cos(phi-phi0) + np.cos(lam0)*np.sin(lam)
 
-        phir = np.arctan2(yr, xr)
-        lamr = np.arcsin(zr)
+        xA = np.cos(lamA)*np.cos(phiA)
+        yA = np.cos(lamA)*np.sin(phiA)
+        zA = np.sin(lamA)
+        rA = np.array([xA, yA, zA]).T
 
-        mlat = lamr*180./np.pi
-        mlon = phir*180./np.pi
+        Rtau = np.array([[np.cos(tau0), np.sin(tau0), 0.], [-np.sin(tau0), np.cos(tau0), 0.], [0., 0., 1.]])
+        # Rthe = np.array([[np.cos(the0), 0., np.sin(the0)], [0., 1., 0.], [-np.sin(the0), 0., np.cos(the0)]])
+        Rlam = np.array([[np.sin(lam0), 0., -np.cos(lam0)], [0., 1., 0.], [np.cos(lam0), 0., np.sin(lam0)]])
+        Rphi = np.array([[np.cos(phi0), np.sin(phi0), 0.], [-np.sin(phi0), np.cos(phi0), 0.], [0., 0., 1.]])
+        # print(rr)
+        R = np.einsum('ij,jk,kl->il', Rtau, Rlam, Rphi)
+
+        # r = np.einsum('ij,jk,kl,...l->...i', Rphi, Rthe, Rtau, rr).T
+        # r = np.einsum('ij,jk,kl,...l->...i', Rphi, Rthe, Rtau, rr).T
+        rM = np.einsum('ij,...j->...i', R, rA).T
+
+        xM = rM[0]
+        yM = rM[1]
+        zM = rM[2]
+
+        phiM = np.arctan2(yM, xM)
+        lamM = np.arcsin(zM)
+
+        mlat = lamM*180./np.pi
+        mlon = phiM*180./np.pi
 
         return mlat, mlon
 
@@ -121,20 +166,45 @@ class Marp(Apex):
             Apex longitude
         """
 
-        lamr = mlat*np.pi/180.
-        phir = mlon*np.pi/180.
+        lamM = mlat*np.pi/180.
+        phiM = mlon*np.pi/180.
         lam0 = self.lam0*np.pi/180.
         phi0 = self.phi0*np.pi/180.
+        tau0 = self.tau0*np.pi/180.
+        # the0 = np.pi/2.-lam0
 
-        x = np.cos(phi0)*np.cos(lam0)*np.cos(lamr)*np.cos(phir) - np.cos(phi0)*np.sin(lam0)*np.sin(lamr) - np.sin(phi0)*np.cos(lamr)*np.sin(phir)
-        y = np.sin(phi0)*np.cos(lam0)*np.cos(lamr)*np.cos(phir) - np.sin(phi0)*np.sin(lam0)*np.sin(lamr) + np.cos(phi0)*np.cos(lamr)*np.sin(phir)
-        z = np.sin(lam0)*np.cos(lamr)*np.cos(phir) + np.cos(lam0)*np.sin(lamr)
+        # x = np.cos(phi0)*np.cos(lam0)*np.cos(lamr)*np.cos(phir) - np.cos(phi0)*np.sin(lam0)*np.sin(lamr) - np.sin(phi0)*np.cos(lamr)*np.sin(phir)
+        # y = np.sin(phi0)*np.cos(lam0)*np.cos(lamr)*np.cos(phir) - np.sin(phi0)*np.sin(lam0)*np.sin(lamr) + np.cos(phi0)*np.cos(lamr)*np.sin(phir)
+        # z = np.sin(lam0)*np.cos(lamr)*np.cos(phir) + np.cos(lam0)*np.sin(lamr)
 
-        phi = np.arctan2(y, x)
-        lam = np.arcsin(z)
+        xM = np.cos(lamM)*np.cos(phiM)
+        yM = np.cos(lamM)*np.sin(phiM)
+        zM = np.sin(lamM)
+        rM = np.array([xM, yM, zM]).T
 
-        alat = lam*180./np.pi
-        alon = phi*180./np.pi
+        Rtau = np.array([[np.cos(tau0), -np.sin(tau0), 0.], [np.sin(tau0), np.cos(tau0), 0.], [0., 0., 1.]])
+        # Rthe = np.array([[np.cos(the0), 0., np.sin(the0)], [0., 1., 0.], [-np.sin(the0), 0., np.cos(the0)]])
+        Rlam = np.array([[np.sin(lam0), 0., np.cos(lam0)], [0., 1., 0.], [-np.cos(lam0), 0., np.sin(lam0)]])
+        Rphi = np.array([[np.cos(phi0), -np.sin(phi0), 0.], [np.sin(phi0), np.cos(phi0), 0.], [0., 0., 1.]])
+        # print(rr)
+        R = np.einsum('ij,jk,kl->il', Rphi, Rlam, Rtau)
+
+        # r = np.einsum('ij,jk,kl,...l->...i', Rphi, Rthe, Rtau, rr).T
+        # r = np.einsum('ij,jk,kl,...l->...i', Rphi, Rthe, Rtau, rr).T
+        rA = np.einsum('ij,...j->...i', R, rM).T
+
+        xA = rA[0]
+        yA = rA[1]
+        zA = rA[2]
+
+        # x = (np.cos(tau0)*np.sin(lam0)*np.cos(phi0)-np.sin(tau0)*np.sin(phi0))*xr + (np.cos(tau0)*np.sin(lam0)*np.sin(phi0)+np.sin(tau0)*np.cos(phi0))*yr - np.cos(tau0)*np.cos(lam0)
+
+
+        phiA = np.arctan2(yA, xA)
+        lamA = np.arcsin(zA)
+
+        alat = lamA*180./np.pi
+        alon = phiA*180./np.pi
 
         return alat, alon
 
