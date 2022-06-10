@@ -21,13 +21,15 @@ class Marp(Apex):
         to this height)
     datafile : str, optional
         Path to custom coefficient file
-    lam0 : float, optional
-        Latitude of MARP origin in either Apex or geodetic coordinates
-    phi0 : float, optional
-        Longitude of MARP origin in either Apex or geodetic coordinates
+    pole : list, optional
+        Location of the new northern pole in Apex or geodetic coordinates plus
+        the rotation angle around that pole (all in degrees)
+    null : list, optional
+        Location of the new null island ((0,0) point) in Apex or geodetic
+        coordinates plus the bearing angle of new north
     alt : float, optional
         Altitude of MARP origin location if it is specified in geodetic
-        coordinates (does nothing if origin specified in Apex coordinates)
+        coordinates (defaults to the refence height)
     coords : str, optional
         Coordinate system MARP origin is specified in
 
@@ -55,16 +57,28 @@ class Marp(Apex):
            Field: the 12th generation, Earth, Planets and Space, 67(1), 79,
            :doi:`10.1186/s40623-015-0228-9`.
     """
-    def __init__(self, date=None, refh=0, datafile=None, lam0=0., phi0=0., tau0=0., null=None, alt=300., coords='apex'):
+    def __init__(self, date=None, refh=0., datafile=None, pole=None, null=None, alt=None, coords='apex'):
 
-        super(Marp, self).__init__(date=date, refh=refh, datafile=None)
+        super(Marp, self).__init__(date=date, refh=refh, datafile=datafile)
 
-        if coords == 'geo':
-            lam0, phi0 = self.geo2apex(lam0, phi0, alt)
+        if not alt:
+            alt = refh
+
+        if pole:
+            if coords == 'geo':
+                pole[0], pole[1] = self.geo2apex(pole[0], pole[1], alt)
+            lam0, phi0, tau0 = pole
+        elif null:
+            if coords == 'geo':
+                f1, f2, f3, g1, g2, g3, d1, d2, d3, e1, e2, e3 = self.basevectors_apex(null[0], null[1], alt)
+                null[0], null[1] = self.geo2apex(null[0], null[1], alt)
+                null[2] = np.arccos(-(np.sin(null[2]*np.pi/180.)*e2[0] + np.cos(null[2]*np.pi/180.)*e2[1])/np.linalg.norm(e2))*180./np.pi
+            lam0, phi0, tau0 = self.null2pole(null)
+
 
         self.lam0 = lam0
         self.phi0 = phi0
-        self.tau0 = tau0+180.
+        self.tau0 = tau0
         # tau = angle between original pole and new null
 
         # self.null2pole(null)
@@ -77,16 +91,13 @@ class Marp(Apex):
         lam2 = np.arcsin(np.cos(lam1)*np.cos(beta))
         phi2 = phi1 + np.arctan2(np.sin(beta)*np.cos(lam1), -np.sin(lam1)*np.sin(lam2))
 
-        # c = lam1
-        # a = lam2
-        # tau = np.arccos(np.cos(c)/np.sin(a))
-        # print(c*180./np.pi, a*180./np.pi, np.cos(c)/np.sin(a), tau*180./np.pi)
+        # Use spherical law of cosines for this
         tau = np.arcsin(np.sin(np.pi/2-lam1)/np.sin(np.pi/2-lam2)*np.sin(beta)) - np.pi
-        print(np.sin(lam1), np.sin(lam2), np.sin(beta), tau*180/np.pi)
 
-        self.lam0 = lam2*180./np.pi
-        self.phi0 = phi2*180./np.pi
-        self.tau0 = tau*180./np.pi
+        return lam2*180./np.pi, phi2*180./np.pi, tau*180./np.pi
+        # self.lam0 = lam2*180./np.pi
+        # self.phi0 = phi2*180./np.pi
+        # self.tau0 = tau*180./np.pi
 
 
     def apex2marp(self, alat, alon):
