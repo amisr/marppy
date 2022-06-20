@@ -95,9 +95,6 @@ class Marp(Apex):
         tau = np.arcsin(np.sin(np.pi/2-lam1)/np.sin(np.pi/2-lam2)*np.sin(beta)) - np.pi
 
         return lam2*180./np.pi, phi2*180./np.pi, tau*180./np.pi
-        # self.lam0 = lam2*180./np.pi
-        # self.phi0 = phi2*180./np.pi
-        # self.tau0 = tau*180./np.pi
 
 
     def apex2marp(self, alat, alon):
