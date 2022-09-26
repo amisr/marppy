@@ -72,7 +72,8 @@ class Marp(Apex):
             if coords == 'geo':
                 f1, f2, f3, g1, g2, g3, d1, d2, d3, e1, e2, e3 = self.basevectors_apex(null[0], null[1], alt)
                 null[0], null[1] = self.geo2apex(null[0], null[1], alt)
-                null[2] = np.arccos(-(np.sin(null[2]*np.pi/180.)*e2[0] + np.cos(null[2]*np.pi/180.)*e2[1])/np.linalg.norm(e2))*180./np.pi
+                brg = np.array([np.sin(null[2]*np.pi/180.), np.cos(null[2]*np.pi/180.)])
+                null[2] = np.sign(np.cross(brg, -e2[:2]))*np.arccos(np.dot(brg, -e2[:2])/np.linalg.norm(e2[:2]))*180./np.pi
             lam0, phi0, tau0 = self.null2pole(null)
 
 
@@ -84,6 +85,7 @@ class Marp(Apex):
         # self.null2pole(null)
 
     def null2pole(self, null):
+        print(null)
         lam1 = null[0]*np.pi/180.
         phi1 = null[1]*np.pi/180.
         beta = null[2]*np.pi/180.
@@ -93,6 +95,7 @@ class Marp(Apex):
 
         # Use spherical law of cosines for this
         tau = np.arcsin(np.sin(np.pi/2-lam1)/np.sin(np.pi/2-lam2)*np.sin(beta)) - np.pi
+        # tau = -np.pi/2
 
         return lam2*180./np.pi, phi2*180./np.pi, tau*180./np.pi
 
