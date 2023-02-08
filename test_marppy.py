@@ -8,8 +8,9 @@ from apexpy import Apex
 
 def test_apex2marp_norotation():
     # validate that if no rotation is set (lam0=0 & phi0=0), marp coordinates equal apex coordinates
-    marp = Marp(date=2019, lam0=0., phi0=0.)
-    alat, alon = np.meshgrid(np.arange(-90., 91., 1.), np.arange(-178., 182., 2.))
+    marp = Marp(date=2019, pole=[90.,0.,0.])
+    # alat, alon = np.meshgrid(np.arange(-90., 91., 1.), np.arange(-178., 182., 2.))
+    alat, alon = np.meshgrid(np.arange(-89., 90., 1.), np.arange(-178., 180., 2.))
 
     mlat, mlon = marp.apex2marp(alat, alon)
 
@@ -19,8 +20,9 @@ def test_apex2marp_norotation():
 
 def test_marp2apex_norotation():
     # validate that if no rotation is set (lam0=0 & phi0=0), apex coordinates equal marp coordinates
-    marp = Marp(date=2019, lam0=0., phi0=0.)
-    mlat, mlon = np.meshgrid(np.arange(-90., 91., 1.), np.arange(-178., 182., 2.))
+    marp = Marp(date=2019, pole=[90.,0.,0.])
+    # mlat, mlon = np.meshgrid(np.arange(-90., 91., 1.), np.arange(-178., 182., 2.))
+    mlat, mlon = np.meshgrid(np.arange(-89., 90., 1.), np.arange(-178., 180., 2.))
 
     alat, alon = marp.apex2marp(mlat, mlon)
 
@@ -30,7 +32,7 @@ def test_marp2apex_norotation():
 
 def test_apex2marp_center():
     # validate that the center point becomes (0,0) in marp
-    marp = Marp(date=2019, lam0=60., phi0=30.)
+    marp = Marp(date=2019, null=[60.,30.,10.])
     mlat, mlon = marp.apex2marp(60., 30.)
 
     np.testing.assert_almost_equal(mlat, 0.)
@@ -39,7 +41,7 @@ def test_apex2marp_center():
 
 def test_marp2apex_center():
     # validate that marp (0,0) becomes the center point in apex
-    marp = Marp(date=2019, lam0=60., phi0=30.)
+    marp = Marp(date=2019, null=[60.,30.,10.])
     alat, alon = marp.marp2apex(0., 0.)
 
     np.testing.assert_almost_equal(alat, 60.)
@@ -48,7 +50,7 @@ def test_marp2apex_center():
 
 def test_apex2marp():
     # validate that trasforming from apex to marp and back to apex returns the original coordinates
-    marp = Marp(date=2019, lam0=60., phi0=30.)
+    marp = Marp(date=2019, pole=[60.,30.,10.])
 
     alat0, alon0 = np.meshgrid(np.arange(-89., 90., 1.), np.arange(-178., 180., 2.))
 
@@ -61,7 +63,8 @@ def test_apex2marp():
 
 def test_marp2apex():
     # validate that trasforming from marp to apex and back to marp returns the original coordinates
-    marp = Marp(date=2019, lam0=60., phi0=30.)
+    # marp = Marp(date=2019, lam0=60., phi0=30.)
+    marp = Marp(date=2019, pole=[60.,30.,10.])
 
     mlat0, mlon0 = np.meshgrid(np.arange(-89., 90., 1.), np.arange(-178., 180., 2.))
 
@@ -74,7 +77,7 @@ def test_marp2apex():
 
 def test_geo2marp():
     # validate that tranforming from geodetic to marp and back to geodetic returns the original coordinates
-    marp = Marp(date=2019, lam0=60., phi0=30.)
+    marp = Marp(date=2019, pole=[60.,30.,10.])
 
     glat0, glon0 = np.meshgrid(np.arange(-89., 90., 1.), np.arange(-178., 180., 2.))
 
@@ -87,7 +90,7 @@ def test_geo2marp():
 
 def test_marp2geo():
     # validate that transforming from marp to geodetic and back to marp returns the original coordinates
-    marp = Marp(date=2019, lam0=60., phi0=30.)
+    marp = Marp(date=2019, pole=[60.,30.,10.])
 
     mlat0, mlon0 = np.meshgrid(np.arange(-89., 90., 1.), np.arange(-178., 180., 2.))
 
@@ -101,7 +104,7 @@ def test_marp2geo():
 def test_basevectors_norotation():
     # validate that if no rotation is set (lam0=0 & phi0=0), marp base vectors equal apex base vectors
     apex = Apex(date=2019)
-    marp = Marp(date=2019, lam0=0., phi0=0.)
+    marp = Marp(date=2019, pole=[90.,0.,0.])
 
     # glat, glon = np.meshgrid(np.arange(-89., 90., 2.), np.arange(-179., 180., 4.))
     glat, glon = np.meshgrid(np.arange(-90., 91., 1.), np.arange(-180., 181., 2.))
@@ -119,7 +122,7 @@ def test_basevectors_norotation():
 
 def test_basevectors_reciprocal():
     # validate that the basevectors are reciprocal, i.e. di*ej=delta{ij} (Richmond 1995, eqn 3.18)
-    marp = Marp(date=2019, lam0=60., phi0=30.)
+    marp = Marp(date=2019, pole=[60.,30.,10.])
     glat, glon = np.meshgrid(np.arange(-90., 91., 1.), np.arange(-180., 181., 2.))
 
     d1, d2, d3, e1, e2, e3 = marp.basevectors_marp(glat.flatten(), glon.flatten(), 0.)
@@ -154,7 +157,7 @@ def test_basevectors_reciprocal():
 def test_basevectors_scaled():
     # validate that the base vectors are properly scaled such that d1xd2*d3 = e1xe2*e3 = 1 (Richmond 1995, eqn 3.17)
     # this is a special property of Apex base vectors
-    marp = Marp(date=2019, lam0=60., phi0=30.)
+    marp = Marp(date=2019, pole=[60.,30.,10.])
     # glat, glon = np.meshgrid(np.arange(50., 90., 2.), np.arange(-179., 180., 4.))
     glat, glon = np.meshgrid(np.arange(-90., 91., 1.), np.arange(-180., 181., 2.))
 
@@ -166,7 +169,7 @@ def test_basevectors_scaled():
 
 def test_basevectors_parallel2B():
     # validate that d3 and e3 are parallel
-    marp = Marp(date=2019, lam0=60., phi0=30.)
+    marp = Marp(date=2019, pole=[60.,30.,10.])
     glat, glon = np.meshgrid(np.arange(-90., 91., 1.), np.arange(-180., 181., 2.))
 
     d1, d2, d3, e1, e2, e3 = marp.basevectors_marp(glat.flatten(), glon.flatten(), 0.)
@@ -180,7 +183,7 @@ def test_basevectors_parallel2B():
 def test_basevectors_construction():
     # validate that the relationships between d and e shown in Richmond 1995, eqn 3.16
     #   and Laundal and Richmond 2016, eqn 57-59 hold true
-    marp = Marp(date=2019, lam0=60., phi0=30.)
+    marp = Marp(date=2019, pole=[60.,30.,10.])
     glat, glon = np.meshgrid(np.arange(-90., 91., 1.), np.arange(-180., 181., 2.))
 
     d1, d2, d3, e1, e2, e3 = marp.basevectors_marp(glat.flatten(), glon.flatten(), 0.)
@@ -197,7 +200,7 @@ def test_basevectors_construction():
 def test_mapping():
     # validate that for an Electric field mapped to different altitudes, Ed1 and Ed2 are constant and
     #   for a Velocity field maped to different altitudes, Ve1 and Ve2 are constant
-    marp = Marp(date=2019, lam0=60., phi0=30.)
+    marp = Marp(date=2019, pole=[60.,30.,10.])
 
     alat = 70.
     alon = 60.
