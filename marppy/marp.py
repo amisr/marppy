@@ -82,10 +82,12 @@ class Marp(Apex):
         self.tau0 = tau0
         # tau = angle between original pole and new null
 
+        self.R = self.rotation_matrix(lam0, phi0, tau0)
+
         # self.null2pole(null)
 
     def null2pole(self, null):
-        print(null)
+
         lam1 = null[0]*np.pi/180.
         phi1 = null[1]*np.pi/180.
         beta = null[2]*np.pi/180.
@@ -98,6 +100,21 @@ class Marp(Apex):
         # tau = -np.pi/2
 
         return lam2*180./np.pi, phi2*180./np.pi, tau*180./np.pi
+
+    def rotation_matrix(self, lam0, phi0, tau0):
+
+        lam0 = lam0*np.pi/180.
+        phi0 = phi0*np.pi/180.
+        tau0 = tau0*np.pi/180.
+
+        Rtau = np.array([[np.cos(tau0), np.sin(tau0), 0.], [-np.sin(tau0), np.cos(tau0), 0.], [0., 0., 1.]])
+        # Rthe = np.array([[np.cos(the0), 0., np.sin(the0)], [0., 1., 0.], [-np.sin(the0), 0., np.cos(the0)]])
+        Rlam = np.array([[np.sin(lam0), 0., -np.cos(lam0)], [0., 1., 0.], [np.cos(lam0), 0., np.sin(lam0)]])
+        Rphi = np.array([[np.cos(phi0), np.sin(phi0), 0.], [-np.sin(phi0), np.cos(phi0), 0.], [0., 0., 1.]])
+        # print(rr)
+        R = np.einsum('ij,jk,kl->il', Rtau, Rlam, Rphi)
+
+        return R
 
 
     def apex2marp(self, alat, alon):
@@ -121,10 +138,10 @@ class Marp(Apex):
 
         lamA = alat*np.pi/180.
         phiA = alon*np.pi/180.
-        lam0 = self.lam0*np.pi/180.
-        phi0 = self.phi0*np.pi/180.
-        tau0 = self.tau0*np.pi/180.
-        the0 = np.pi/2.-lam0
+        # lam0 = self.lam0*np.pi/180.
+        # phi0 = self.phi0*np.pi/180.
+        # tau0 = self.tau0*np.pi/180.
+        # the0 = np.pi/2.-lam0
 
         # xr = np.cos(lam0)*np.cos(lam)*np.cos(phi-phi0) + np.sin(lam0)*np.sin(lam)
         # yr = np.cos(lam)*np.sin(phi-phi0)
@@ -135,16 +152,16 @@ class Marp(Apex):
         zA = np.sin(lamA)
         rA = np.array([xA, yA, zA]).T
 
-        Rtau = np.array([[np.cos(tau0), np.sin(tau0), 0.], [-np.sin(tau0), np.cos(tau0), 0.], [0., 0., 1.]])
-        # Rthe = np.array([[np.cos(the0), 0., np.sin(the0)], [0., 1., 0.], [-np.sin(the0), 0., np.cos(the0)]])
-        Rlam = np.array([[np.sin(lam0), 0., -np.cos(lam0)], [0., 1., 0.], [np.cos(lam0), 0., np.sin(lam0)]])
-        Rphi = np.array([[np.cos(phi0), np.sin(phi0), 0.], [-np.sin(phi0), np.cos(phi0), 0.], [0., 0., 1.]])
-        # print(rr)
-        R = np.einsum('ij,jk,kl->il', Rtau, Rlam, Rphi)
+        # Rtau = np.array([[np.cos(tau0), np.sin(tau0), 0.], [-np.sin(tau0), np.cos(tau0), 0.], [0., 0., 1.]])
+        # # Rthe = np.array([[np.cos(the0), 0., np.sin(the0)], [0., 1., 0.], [-np.sin(the0), 0., np.cos(the0)]])
+        # Rlam = np.array([[np.sin(lam0), 0., -np.cos(lam0)], [0., 1., 0.], [np.cos(lam0), 0., np.sin(lam0)]])
+        # Rphi = np.array([[np.cos(phi0), np.sin(phi0), 0.], [-np.sin(phi0), np.cos(phi0), 0.], [0., 0., 1.]])
+        # # print(rr)
+        # R = np.einsum('ij,jk,kl->il', Rtau, Rlam, Rphi)
 
         # r = np.einsum('ij,jk,kl,...l->...i', Rphi, Rthe, Rtau, rr).T
         # r = np.einsum('ij,jk,kl,...l->...i', Rphi, Rthe, Rtau, rr).T
-        rM = np.einsum('ij,...j->...i', R, rA).T
+        rM = np.einsum('ij,...j->...i', self.R, rA).T
 
         xM = rM[0]
         yM = rM[1]
@@ -179,9 +196,9 @@ class Marp(Apex):
 
         lamM = mlat*np.pi/180.
         phiM = mlon*np.pi/180.
-        lam0 = self.lam0*np.pi/180.
-        phi0 = self.phi0*np.pi/180.
-        tau0 = self.tau0*np.pi/180.
+        # lam0 = self.lam0*np.pi/180.
+        # phi0 = self.phi0*np.pi/180.
+        # tau0 = self.tau0*np.pi/180.
         # the0 = np.pi/2.-lam0
 
         # x = np.cos(phi0)*np.cos(lam0)*np.cos(lamr)*np.cos(phir) - np.cos(phi0)*np.sin(lam0)*np.sin(lamr) - np.sin(phi0)*np.cos(lamr)*np.sin(phir)
@@ -193,16 +210,16 @@ class Marp(Apex):
         zM = np.sin(lamM)
         rM = np.array([xM, yM, zM]).T
 
-        Rtau = np.array([[np.cos(tau0), -np.sin(tau0), 0.], [np.sin(tau0), np.cos(tau0), 0.], [0., 0., 1.]])
-        # Rthe = np.array([[np.cos(the0), 0., np.sin(the0)], [0., 1., 0.], [-np.sin(the0), 0., np.cos(the0)]])
-        Rlam = np.array([[np.sin(lam0), 0., np.cos(lam0)], [0., 1., 0.], [-np.cos(lam0), 0., np.sin(lam0)]])
-        Rphi = np.array([[np.cos(phi0), -np.sin(phi0), 0.], [np.sin(phi0), np.cos(phi0), 0.], [0., 0., 1.]])
-        # print(rr)
-        R = np.einsum('ij,jk,kl->il', Rphi, Rlam, Rtau)
+        # Rtau = np.array([[np.cos(tau0), -np.sin(tau0), 0.], [np.sin(tau0), np.cos(tau0), 0.], [0., 0., 1.]])
+        # # Rthe = np.array([[np.cos(the0), 0., np.sin(the0)], [0., 1., 0.], [-np.sin(the0), 0., np.cos(the0)]])
+        # Rlam = np.array([[np.sin(lam0), 0., np.cos(lam0)], [0., 1., 0.], [-np.cos(lam0), 0., np.sin(lam0)]])
+        # Rphi = np.array([[np.cos(phi0), -np.sin(phi0), 0.], [np.sin(phi0), np.cos(phi0), 0.], [0., 0., 1.]])
+        # # print(rr)
+        # R = np.einsum('ij,jk,kl->il', Rphi, Rlam, Rtau)
 
         # r = np.einsum('ij,jk,kl,...l->...i', Rphi, Rthe, Rtau, rr).T
         # r = np.einsum('ij,jk,kl,...l->...i', Rphi, Rthe, Rtau, rr).T
-        rA = np.einsum('ij,...j->...i', R, rM).T
+        rA = np.einsum('ij,...j->...i', self.R.T, rM).T
 
         xA = rA[0]
         yA = rA[1]
@@ -318,9 +335,9 @@ class Marp(Apex):
         pM = np.asarray(mlon)*np.pi/180.
         lA = np.asarray(alat)*np.pi/180.
         pA = np.asarray(alon)*np.pi/180.
-        lam0 = self.lam0*np.pi/180.
-        phi0 = self.phi0*np.pi/180.
-        tau0 = self.tau0*np.pi/180.
+        # lam0 = self.lam0*np.pi/180.
+        # phi0 = self.phi0*np.pi/180.
+        # tau0 = self.tau0*np.pi/180.
 
         f1, f2, f3, g1, g2, g3, d1, d2, d3, e1, e2, e3 = self.basevectors_apex(glat, glon, height)
 
@@ -337,12 +354,12 @@ class Marp(Apex):
         # dlrdp = np.sin(l0)*np.cos(l)*np.sin(p-p0)/np.sqrt(1-zr**2)
         # dlrdl = (np.sin(l0)*np.sin(l)*np.cos(p-p0)+np.cos(l0)*np.cos(l))/np.sqrt(1-zr**2)
 
-        Rtau = np.array([[np.cos(tau0), np.sin(tau0), 0.], [-np.sin(tau0), np.cos(tau0), 0.], [0., 0., 1.]])
-        # Rthe = np.array([[np.cos(the0), 0., np.sin(the0)], [0., 1., 0.], [-np.sin(the0), 0., np.cos(the0)]])
-        Rlam = np.array([[np.sin(lam0), 0., -np.cos(lam0)], [0., 1., 0.], [np.cos(lam0), 0., np.sin(lam0)]])
-        Rphi = np.array([[np.cos(phi0), np.sin(phi0), 0.], [-np.sin(phi0), np.cos(phi0), 0.], [0., 0., 1.]])
-        # print(rr)
-        R = np.einsum('ij,jk,kl->il', Rtau, Rlam, Rphi)
+        # Rtau = np.array([[np.cos(tau0), np.sin(tau0), 0.], [-np.sin(tau0), np.cos(tau0), 0.], [0., 0., 1.]])
+        # # Rthe = np.array([[np.cos(the0), 0., np.sin(the0)], [0., 1., 0.], [-np.sin(the0), 0., np.cos(the0)]])
+        # Rlam = np.array([[np.sin(lam0), 0., -np.cos(lam0)], [0., 1., 0.], [np.cos(lam0), 0., np.sin(lam0)]])
+        # Rphi = np.array([[np.cos(phi0), np.sin(phi0), 0.], [-np.sin(phi0), np.cos(phi0), 0.], [0., 0., 1.]])
+        # # print(rr)
+        # R = np.einsum('ij,jk,kl->il', Rtau, Rlam, Rphi)
 
         xM = np.cos(lM)*np.cos(pM)
         yM = np.cos(lM)*np.sin(pM)
@@ -356,9 +373,9 @@ class Marp(Apex):
         # P2 = np.array([[-yM/(xM**2+yM**2), xM/(xM**2+yM**2), np.asarray(0.)], [np.asarray(0.), np.asarray(0.), 1./np.sqrt(1-zM**2)]])
 
 
-        print(P1.shape, P2.shape, R.shape)
-        dMdA = np.einsum('ij...,jk,kl...->il...', P2, R, P1)
-        print(dMdA.shape)
+        # print(P1.shape, P2.shape, R.shape)
+        dMdA = np.einsum('ij...,jk,kl...->il...', P2, self.R, P1)
+        # print(dMdA.shape)
 
         dpMdpA = dMdA[0,0]
         dpMdlA = dMdA[0,1]
@@ -390,9 +407,9 @@ class Marp(Apex):
         # P1 = np.array([[-np.sin(pM)*np.cos(lM), -np.cos(pM)*np.sin(lM)], [np.cos(pM)*np.cos(lM), -np.sin(pM)*np.sin(lM)], [np.asarray(0.), np.cos(lM)]])
         # P2 = np.array([[-yA/(xA**2+yA**2), xA/(xA**2+yA**2), np.asarray(0.)], [np.asarray(0.), np.asarray(0.), 1./np.sqrt(1-zA**2)]])
 
-        print(P1.shape, P2.shape, R.shape)
-        dAdM = np.einsum('ij...,jk,kl...->il...', P2, R.T, P1)
-        print(dMdA.shape)
+        # print(P1.shape, P2.shape, R.shape)
+        dAdM = np.einsum('ij...,jk,kl...->il...', P2, self.R.T, P1)
+        # print(dMdA.shape)
 
         dpAdpM = dAdM[0,0]
         dpAdlM = dAdM[0,1]
