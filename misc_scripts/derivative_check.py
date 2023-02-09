@@ -4,7 +4,7 @@
 #   the expressions copied from marp.py.
 # If all expressions are correct, all fields of the results printed to screen will be zero.
 
-# from sympy import *
+import sympy as sym
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
@@ -34,7 +34,7 @@ def contravariant_derivatives():
 
 
     # Plot derivitative caluculated analytically and numerically to check correctness of analytic solution
-    
+
     lam0 = 60.*np.pi/180.
     phi0 = 30.*np.pi/180.
     tau0 = 20.*np.pi/180.
@@ -117,26 +117,26 @@ def contravariant_derivatives():
 
 def covariant_derivatives():
 
-    x, y, z, zr, yr, zr, l, p, lr, pr, l0, p0 = symbols('x y z xr yr zr l p lr pr l0 p0')
+    x, y, z, zr, yr, zr, l, p, lr, pr, l0, p0 = sym.symbols('x y z xr yr zr l p lr pr l0 p0')
 
-    x = cos(p0)*cos(l0)*cos(lr)*cos(pr) - cos(p0)*sin(l0)*sin(lr) - sin(p0)*cos(lr)*sin(pr)
-    y = sin(p0)*cos(l0)*cos(lr)*cos(pr) - sin(p0)*sin(l0)*sin(lr) + cos(p0)*cos(lr)*sin(pr)
-    z = sin(l0)*cos(lr)*cos(pr) + cos(l0)*sin(lr)
+    x = sym.cos(p0)*sym.cos(l0)*sym.cos(lr)*sym.cos(pr) - sym.cos(p0)*sym.sin(l0)*sym.sin(lr) - sym.sin(p0)*sym.cos(lr)*sym.sin(pr)
+    y = sym.sin(p0)*sym.cos(l0)*sym.cos(lr)*sym.cos(pr) - sym.sin(p0)*sym.sin(l0)*sym.sin(lr) + sym.cos(p0)*sym.cos(lr)*sym.sin(pr)
+    z = sym.sin(l0)*sym.cos(lr)*sym.cos(pr) + sym.cos(l0)*sym.sin(lr)
 
-    p = atan2(y,x)
-    l = asin(z)
+    p = sym.atan2(y,x)
+    l = sym.asin(z)
 
     # partial derivatives hard-coded in marp.py
-    dpdpr = cos(lr)*(cos(l0)*cos(lr)-sin(l0)*sin(lr)*cos(pr))/(x**2+y**2)
-    dpdlr = sin(l0)*sin(pr)/(x**2+y**2)
-    dldpr = -sin(l0)*cos(lr)*sin(pr)/sqrt(1-z**2)
-    dldlr = (cos(l0)*cos(lr)-sin(l0)*sin(lr)*cos(pr))/sqrt(1-z**2)
+    dpdpr = sym.cos(lr)*(sym.cos(l0)*sym.cos(lr)-sym.sin(l0)*sym.sin(lr)*sym.cos(pr))/(x**2+y**2)
+    dpdlr = sym.sin(l0)*sym.sin(pr)/(x**2+y**2)
+    dldpr = -sym.sin(l0)*sym.cos(lr)*sym.sin(pr)/sym.sqrt(1-z**2)
+    dldlr = (sym.cos(l0)*sym.cos(lr)-sym.sin(l0)*sym.sin(lr)*sym.cos(pr))/sym.sqrt(1-z**2)
 
     print('COVARIANT DERIVATIVES')
-    print('dpdpr:', simplify(diff(p, pr)-dpdpr))
-    print('dpdlr:', simplify(diff(p, lr)-dpdlr))
-    print('dldpr:', simplify(diff(l, pr)-dldpr))
-    print('dldlr:', simplify(diff(l, lr)-dldlr))
+    print('dpdpr:', sym.simplify(sym.diff(p, pr)-dpdpr))
+    print('dpdlr:', sym.simplify(sym.diff(p, lr)-dpdlr))
+    print('dldpr:', sym.simplify(sym.diff(l, pr)-dldpr))
+    print('dldlr:', sym.simplify(sym.diff(l, lr)-dldlr))
 
 def main():
     contravariant_derivatives()
