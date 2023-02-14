@@ -107,9 +107,7 @@ class Marp(Apex):
 
         """
 
-        lam1 = null[0]*np.pi/180.
-        phi1 = null[1]*np.pi/180.
-        beta = null[2]*np.pi/180.
+        lam1, phi1, beta = np.array(null)*np.pi/180.
 
         # Haversine formula
         lam2 = np.arcsin(np.cos(lam1)*np.cos(beta))
@@ -145,10 +143,9 @@ class Marp(Apex):
         tau0 = tau0*np.pi/180.
 
         Rtau = np.array([[np.cos(tau0), np.sin(tau0), 0.], [-np.sin(tau0), np.cos(tau0), 0.], [0., 0., 1.]])
-        # Rthe = np.array([[np.cos(the0), 0., np.sin(the0)], [0., 1., 0.], [-np.sin(the0), 0., np.cos(the0)]])
         Rlam = np.array([[np.sin(lam0), 0., -np.cos(lam0)], [0., 1., 0.], [np.cos(lam0), 0., np.sin(lam0)]])
         Rphi = np.array([[np.cos(phi0), np.sin(phi0), 0.], [-np.sin(phi0), np.cos(phi0), 0.], [0., 0., 1.]])
-        # print(rr)
+
         R = np.einsum('ij,jk,kl->il', Rtau, Rlam, Rphi)
 
         return R
