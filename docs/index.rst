@@ -10,8 +10,9 @@ Welcome to marppy's documentation!
    :maxdepth: 2
 
    readme
-   marp
+   .. marp
    installation
+   usage
    reference
 
 

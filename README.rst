@@ -1,7 +1,8 @@
 Overview
 ==========
 
-This is a python implementation of conversions to and from the Modified Apex - Rotated Pole (MARP) coordinate system.  MARP is based on the Apex coordinate system (Richmond, 1995), but performs a  transformation to rotate the pole of the coordinate system to an arbitrary location.  This is advantageous for doing calculations at high latitudes because it removes some of the geometric complications.
+This is a python implementation of conversions to and from the Modified Apex - Rotated Pole (MARP) coordinate system.  MARP is based on the Apex coordinate system (Richmond, 1995), but performs a  transformation to rotate the pole of the coordinate system to an arbitrary location.  This is advantageous for doing calculations at high latitudes because it removes some of the complications
+associated with performing calculations near the pole of the coordinate system.
 
 This code is heavily based on `apexpy <https://github.com/aburrell/apexpy>`_.
 
@@ -9,15 +10,23 @@ This code is heavily based on `apexpy <https://github.com/aburrell/apexpy>`_.
 Installation
 ------------
 
-The easiest way to install marppy is from PyPI::
+The easiest way to install marppy is from PyPI:
+
+.. code-block::
 
   pip install marppy
+
+Note: `apexpy <https://apexpy.readthedocs.io/en/latest/installation.html>`_ must already be installed for this to work.
+
+See :ref:`Installation` for more details.
 
 
 Usage
 -----
 
-All functionality is available through the marppy.Marp class. Instantiate the class with the date and the new MARP "origin" (mlat=0, mlon=0) coordinates that dictate how the coordinate system will be rotated, then use the various conversion routines::
+All functionality is available through the marppy.Marp class. Instantiate the class with the date and the MARP null island ("origin") coordinates that dictate how the coordinate system will be rotated, then use the various conversion routines.
+
+.. code-block:: python
 
   >>> from marppy import Marp
   >>> M = Marp(date=2022.5, lam0=80., phi0=30.)
@@ -30,6 +39,8 @@ All functionality is available through the marppy.Marp class. Instantiate the cl
   >>> # apex to marp - entering the original rotation coordinates should return (0,0)
   >>> M.apex2marp(80., 30.)
   (0.0, 0.0)
+
+See :ref:`Usage` for more details.
 
 
 Documentation
