@@ -18,7 +18,7 @@ The easiest way to install marppy is from PyPI:
 
 Note: apexpy must already be installed for this to work.
 
-See :ref:`Installation` for more details.
+See `Installation <https://marppy.readthedocs.io/en/latest/installation.html>`_ for more details.
 
 
 Usage
@@ -40,7 +40,7 @@ All functionality is available through the marppy.Marp class. Instantiate the cl
   >>> M.apex2marp(80., 30.)
   (0.0, 0.0)
 
-See :ref:`Usage` for more details.
+See `Usage <https://marppy.readthedocs.io/en/latest/usage.html>`_ for more details.
 
 
 Documentation
