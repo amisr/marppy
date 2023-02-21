@@ -3,11 +3,13 @@
 
 name: Publish marppy to PyPI
 
-on: push
+on:
+  workflow-dispatch
+  # push
 
 jobs:
   build-n-publish:
-    name: Build and publish distribution to Test PyPI
+    name: Build and publish distribution to PyPI
     runs-on: ubuntu-latest
 
     steps:
@@ -29,7 +31,7 @@ jobs:
 #     password: ${{ secrets.PYPI_API_TOKEN }}
 
       - name: Publish distribution to Test PyPI
-        if: github.event_name == 'push'
+        if: github.event_name == 'workflow-dispatch'
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           skip_existing: true
@@ -37,6 +39,12 @@ jobs:
           # password: ${{ secrets.PYPI_API_TOKEN }}
           password: ${{ secrets.TEST_PYPI_API_TOKEN }}
           repository_url: https://test.pypi.org/legacy/
+
+      - name: Publish distribution to PyPI
+        if: github.event_name == 'release'
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
 
 
 # on:
