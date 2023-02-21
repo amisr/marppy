@@ -4,7 +4,7 @@
 name: Publish marppy to PyPI
 
 on:
-  workflow-dispatch
+  workflow_dispatch
   # push
 
 jobs:
@@ -31,7 +31,7 @@ jobs:
 #     password: ${{ secrets.PYPI_API_TOKEN }}
 
       - name: Publish distribution to Test PyPI
-        if: github.event_name == 'workflow-dispatch'
+        if: github.event_name == 'workflow_dispatch'
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           skip_existing: true
