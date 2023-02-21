@@ -6,7 +6,7 @@ name: Publish marppy to PyPI
 on: push
 
 jobs:
-  test build-n-publish:
+  build-n-publish:
     name: Build and publish distribution to Test PyPI
     runs-on: ubuntu-latest
 
