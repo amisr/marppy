@@ -4,7 +4,7 @@
 name: Publish marppy to PyPI
 
 on:
-  pull_request_target:
+  pull_request:
     branches: ['main']
   release:
     types: [published]
@@ -34,7 +34,7 @@ jobs:
 #     password: ${{ secrets.PYPI_API_TOKEN }}
 
       - name: Publish distribution to Test PyPI
-        if: github.event_name == 'pull_request_target'
+        if: github.event_name == 'pull_request'
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           skip_existing: true
