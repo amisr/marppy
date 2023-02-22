@@ -4,7 +4,7 @@ Overview
 This is a python implementation of conversions to and from the Modified Apex - Rotated Pole (MARP) coordinate system.  MARP is based on the Apex coordinate system (Richmond, 1995), but performs a  transformation to rotate the pole of the coordinate system to an arbitrary location.  This is advantageous for doing calculations at high latitudes because it removes some of the complications
 associated with performing calculations near the pole of the coordinate system.
 
-This code is heavily based on `apexpy <https://github.com/aburrell/apexpy>`_.
+This code is heavily based on `apexpy <https://apexpy.readthedocs.io/en/latest>`_.
 
 
 Installation
@@ -16,9 +16,9 @@ The easiest way to install marppy is from PyPI:
 
   pip install marppy
 
-Note: `apexpy <https://apexpy.readthedocs.io/en/latest/installation.html>`_ must already be installed for this to work.
+Note: apexpy must already be installed for this to work.
 
-See :ref:`Installation` for more details.
+See `Installation <https://marppy.readthedocs.io/en/latest/installation.html>`_ for more details.
 
 
 Usage
@@ -40,7 +40,7 @@ All functionality is available through the marppy.Marp class. Instantiate the cl
   >>> M.apex2marp(80., 30.)
   (0.0, 0.0)
 
-See :ref:`Usage` for more details.
+See `Usage <https://marppy.readthedocs.io/en/latest/usage.html>`_ for more details.
 
 
 Documentation
